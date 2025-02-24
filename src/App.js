@@ -1,13 +1,35 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Board from "./components/Board";
-import Column from "./components/Column";
+import TaskList from './components/TaskList';
+import Nav from './components/Nav';  // Import du composant Nav
+import Header from './components/Header'; // Import du composant Header
 
 function App() {
   return (
-    <div className="App">
-        <Board />
-    </div>
+    <Router>
+      <div className="app-container">
+        {/* Header en haut */}
+        <Header />
+
+        <div className="main-content">
+          {/* Navigation à gauche */}
+          <Nav />
+
+          {/* Contenu principal, avec un margin-left pour ne pas être caché par la nav */}
+          <div className="content">
+            <div className="container-fluid">
+              <Routes>
+                <Route exact path="/" element={<Board />} />
+                <Route exact path="/list" element={<TaskList />} />
+                {/* Autres routes si nécessaire */}
+              </Routes>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Router>
   );
 }
 

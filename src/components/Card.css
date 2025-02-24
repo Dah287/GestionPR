@@ -1,0 +1,36 @@
+.container {
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px 2px grey;
+    padding: 8px;
+    color: #000;
+    margin-bottom: 8px;
+    min-height: 120px;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.text-content {
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+}
+
+.icons {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px;
+    align-items: center;
+}
+
+.icon-group {
+    display: flex;
+    gap: 10px;
+}
+
+.avatar {
+    cursor: pointer;
+}

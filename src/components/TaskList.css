@@ -1,0 +1,162 @@
+/* Conteneur principal avec flexbox */
+.task-container {
+    display: flex;
+    gap: 20px; /* Espacement entre les colonnes */
+    width: 100%;
+  }
+  
+  /* Colonne de chaque liste */
+  .column {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Chaque colonne prendra l'espace restant disponible */
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    
+  }
+
+ .list{
+
+    margin-left: 126px;  
+  }
+  
+  /* Titre de chaque colonne */
+  .column h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  /* Liste des tâches */
+  .task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Chaque tâche */
+  .task-item {
+    background-color: #fff;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .task-item:hover {
+    background-color: #f0f8ff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .task-item {
+    background-color: #fff;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .task-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .task-description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  .task-meta {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 5px;
+  }
+  
+  .task-priority {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  /* Couleurs de priorité */
+  .task-priority.low {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .task-priority.medium {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .task-priority.high {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  .task-info , .task-title{
+    margin-right: 110px;
+  }
+  /* Style pour le titre avec fond coloré */
+/* Style pour le titre avec fond coloré */
+.status-title {
+      
+    color: white; /* Couleur du texte */
+    display: inline-flex;
+    align-items: center; /* Centre verticalement */
+    padding: 10px 15px; /* Espacement autour du texte (réduit par rapport à avant) */
+    border-radius: 5px; /* Coins arrondis */
+    font-size: 16px; /* Taille du texte réduite */
+  }
+  
+  /* Style pour l'icône dans un cercle */
+  .status-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 8px; /* Espace entre le texte et l'icône (réduit) */
+    width: 20px; /* Largeur réduite du cercle */
+    height: 20px; /* Hauteur réduite du cercle */
+    border-radius: 50%; /* Cercle */
+    background-color: white; /* Couleur de fond de l'icône */
+    color: white; /* Couleur de l'icône */
+    font-size: 12px; /* Taille réduite de l'icône */
+    margin-left:0px ;
+    margin-right:10px ;
+  }
+  
+
+
+
+ .nn {
+    width: 90px;
+    height: 15px;
+    background-color:  #0091FF;
+  }
+
+  .nnn {
+    width: 121px;
+    height: 15px;
+    background-color: #5c52ed;
+  }
+  .nnnn {
+    width: 115px;
+    height: 15px;
+    background-color:  #8D8D8D;
+  }
+
+  
+  
+  

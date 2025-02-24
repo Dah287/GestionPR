@@ -36,3 +36,66 @@
     transform: rotate(360deg);
   }
 }
+/* Container global */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+.header {
+  height: 20px; /* Hauteur du header */
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 0;
+}
+
+/* Container principal qui contient le header et le contenu */
+.main-content {
+  display: flex;
+  flex: 1;
+  position: relative; /* Pour permettre un comportement relatif pour la gestion de la position du contenu */
+}
+
+/* Navigation à gauche de l'écran */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0; /* Place la nav à gauche */
+  width: 100px; /* Largeur de la nav */
+  background-color: #444;
+  height: 100vh; /* Prend toute la hauteur de l'écran */
+  padding-top: 20px;
+  padding-left: 10px;
+  z-index: 1000; /* Pour garantir que la nav soit au-dessus du contenu */
+}
+
+.nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.nav ul li {
+  margin-bottom: 10px;
+}
+
+.nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Contenu principal avec un padding-left suffisant pour ne pas être recouvert par la nav */
+.content {
+  flex: 1;
+  margin-left: 100px; /* Donne de l'espace pour la nav à gauche */
+  padding: 20px;
+  overflow-y: auto; /* Pour gérer le défilement si nécessaire */
+}
