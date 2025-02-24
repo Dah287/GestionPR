@@ -21,6 +21,7 @@ public class UtilisateurController {
         return utilisateurService.getAllUtilisateurs();
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<Utilisateur> getUtilisateurById(@PathVariable Long id) {
         Utilisateur utilisateur = utilisateurService.getUtilisateurById(id);

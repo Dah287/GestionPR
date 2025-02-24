@@ -29,7 +29,7 @@ public class TaskService {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
         task.setUserId(taskDetails.getUserId());
         task.setTitle(taskDetails.getTitle());
-        task.setCompleted(taskDetails.getCompleted());
+        task.setStatus(taskDetails.getStatus());
         return taskRepository.save(task);
     }
     // Récupérer toutes les tâches

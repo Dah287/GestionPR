@@ -1,9 +1,6 @@
 package com.example.GesPro.Entite;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Task {
@@ -14,7 +11,9 @@ public class Task {
 
     private Long userId;
     private String title;
-    private Boolean completed;
+
+    @Enumerated(EnumType.STRING)
+    private Status status; // Utilisation de l'énumération Status
 
     // Getters and Setters
     public Long getId() {
@@ -41,11 +40,11 @@ public class Task {
         this.title = title;
     }
 
-    public Boolean getCompleted() {
-        return completed;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setCompleted(Boolean completed) {
-        this.completed = completed;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
