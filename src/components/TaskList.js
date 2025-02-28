@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
-
+import { useParams } from "react-router-dom";
 import "./TaskList.css";
 export default function TaskList() {
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
+  //const { id } = useParams();
 
+  const projetId = localStorage.getItem("selectedProjet");
   useEffect(() => {
-    fetch("http://localhost:8080/api/tasks")
+    fetch(`http://localhost:8080/projets/${projetId}/taches`) // Charge les tâches du projet
       .then((response) => response.json())
       .then((json) => {
         setTodo(json.filter((task) => task.status === "TODO"));
@@ -83,10 +85,151 @@ export default function TaskList() {
     return array.filter((item) => item.id != id);
   }
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [task, setTask] = useState({
+    title: '',
+    userId: '',
+    status: 'TODO', // Par exemple
+    projet: { id: '' }, // Projet sous forme d'objet avec un champ id
+  });
+  
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'projetId') {
+      setTask({
+        ...task,
+        projet: { id: value }, // Mise à jour de l'objet projet avec le champ id
+      });
+    } else {
+      setTask({
+        ...task,
+        [name]: value,
+      });
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const projetId = localStorage.getItem("selectedProjet"); // Récupération du projet ID
+    if (!projetId) {
+      alert("Projet non sélectionné !");
+      return;
+    }
+  
+    const newTask = {
+      ...task,
+      projet: {
+        id: parseInt(projetId), // Associer la tâche au projet sous forme d'objet
+      },
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTask),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'ajout de la tâche");
+      }
+  
+      const savedTask = await response.json();
+      console.log("Tâche enregistrée :", savedTask);
+  
+      // Mise à jour de l'état local en fonction du statut
+      switch (savedTask.status) {
+        case "TODO":
+          setTodo([...todo, savedTask]);
+          break;
+        case "IN_PROGRESS":
+          setInProgress([...inProgress, savedTask]);
+          break;
+        case "DONE":
+          setDone([...done, savedTask]);
+          break;
+        default:
+          break;
+      }
+  
+      setIsModalOpen(false); // Fermer la modal après succès
+      setTask({ title: "", userId: "", status: "TODO", projet: { id: "" } }); // Réinitialiser le formulaire
+    } catch (error) {
+      console.error("Erreur :", error);
+      alert("Une erreur est survenue lors de l'ajout de la tâche.");
+    }
+  };
+  
+  
+
   return (
     <div className="task-list-container">
-      <h3>Liste de Taches</h3>
-  
+      {/* Conteneur du titre et du bouton sur la même ligne */}
+      <div className="vc">
+        <h3>Liste de Taches</h3>
+        <button onClick={handleOpenModal} className="add-task-btn">
+          Ajouter une tâche
+        </button>
+      </div>
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h4>Créer ou Modifier une Tâche</h4>
+            <form onSubmit={handleSubmit}>
+              <div>
+                <label>Titre</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={task.title}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <label>Utilisateur ID</label>
+                <input
+                  type="number"
+                  name="userId"
+                  value={task.userId}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <label>Statut</label>
+                <select
+                  name="status"
+                  value={task.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="TODO">À faire</option>
+                  <option value="IN_PROGRESS">En cours</option>
+                  <option value="DONE">Terminé</option>
+                </select>
+              </div>
+
+              <div className="modal-actions">
+                <button type="submit">Enregistrer</button>
+                <button type="button" onClick={handleCloseModal}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex-container">
           {/* TODO List */}

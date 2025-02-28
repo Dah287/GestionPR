@@ -5,6 +5,7 @@ import Board from "./components/Board";
 import TaskList from './components/TaskList';
 import Nav from './components/Nav';  // Import du composant Nav
 import Header from './components/Header'; // Import du composant Header
+import Projet from './components/Projet';
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
               <Routes>
                 <Route exact path="/" element={<Board />} />
                 <Route exact path="/list" element={<TaskList />} />
+                <Route exact path="/projet" element={<Projet/>} />
+
                 {/* Autres routes si nécessaire */}
               </Routes>
             </div>

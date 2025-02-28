@@ -7,9 +7,9 @@ const TaskBoard = () => {
     const [todo, setTodo] = useState([]);
     const [inProgress, setInProgress] = useState([]);
     const [done, setDone] = useState([]);
-
+    const projetId = localStorage.getItem("selectedProjet");
     useEffect(() => {
-        fetch("http://localhost:8080/api/tasks")
+        fetch(`http://localhost:8080/projets/${projetId}/taches`)
             .then((response) => response.json())
             .then((json) => {
                 setTodo(json.filter((task) => task.status === "TODO"));

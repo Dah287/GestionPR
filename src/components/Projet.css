@@ -1,0 +1,96 @@
+.tasks-list-container {
+    padding-top: 100px;
+    padding-left: 120px; /* Ajuste cette valeur selon la hauteur de ton header/nav */
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .project-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .project-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    width: 90%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .project-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .project-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    width: 100%;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-right: 70px;
+  }
+  
+  .project-title strong {
+    font-weight: bold;
+    color: #0056b3; /* Un bleu légèrement plus foncé pour l'ID */
+  }
+  
+  .project-title:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .circle-progress {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    background: radial-gradient(white 60%, transparent 61%),
+                conic-gradient(#800080 var(--percentage), #e0e0e0 0%);
+    animation: fillAnimation 2s ease-out forwards;
+    margin-left: 120px;
+    
+  }
+  
+  .selected {
+    background-color: #d9f7be;
+    border-left: 5px solid #4caf50;
+  }
+  
+  @keyframes fillAnimation {
+    from {
+      background: radial-gradient(white 60%, transparent 61%),
+                  conic-gradient(#800080 0%, #e0e0e0 0%);
+    }
+    to {
+      background: radial-gradient(white 60%, transparent 61%),
+                  conic-gradient(#800080 var(--percentage), #e0e0e0 0%);
+    }
+  }
+  
