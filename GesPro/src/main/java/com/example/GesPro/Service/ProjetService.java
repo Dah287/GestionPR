@@ -1,10 +1,13 @@
 package com.example.GesPro.Service;
 
 import com.example.GesPro.Entite.Projet;
+import com.example.GesPro.Entite.Tache;
+import com.example.GesPro.Entite.Tache1;
 import com.example.GesPro.Repository.ProjetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +38,12 @@ public class ProjetService {
             return true;
         }
         return false;  // Si le projet n'existe pas
+    }
+    public List<Tache> getTachesByProjetId(Long projetId) {
+        Optional<Projet> projet = projetRepository.findById(projetId);
+        if (projet.isPresent()) {
+            return projet.get().getTaches(); // Retourne la liste des tâches associées au projet
+        }
+        return Collections.emptyList(); // Retourner une liste vide si le projet n'existe pas
     }
 }

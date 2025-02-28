@@ -1,6 +1,8 @@
 package com.example.GesPro.Controller;
 
 import com.example.GesPro.Entite.Projet;
+import com.example.GesPro.Entite.Tache;
+import com.example.GesPro.Entite.Tache1;
 import com.example.GesPro.Service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/projets")
 public class ProjetController {
@@ -20,6 +22,9 @@ public class ProjetController {
     public List<Projet> getAllProjets() {
         return projetService.getAllProjets();
     }
+
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Projet> getProjetById(@PathVariable Long id) {
@@ -42,4 +47,16 @@ public class ProjetController {
         projetService.deleteProjet(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();  // Status 204 No Content
     }
+
+
+
+    @GetMapping("/{id}/taches")
+    public ResponseEntity<List<Tache>> getTachesByProjetId(@PathVariable Long id) {
+        List<Tache> taches = projetService.getTachesByProjetId(id);
+        if (taches.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Retourner 204 si aucune tâche n'est trouvée
+        }
+        return ResponseEntity.ok(taches); // Retourner les tâches avec un code 200 OK
+    }
+
 }

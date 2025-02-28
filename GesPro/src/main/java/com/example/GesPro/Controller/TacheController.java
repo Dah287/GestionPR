@@ -1,6 +1,6 @@
 package com.example.GesPro.Controller;
 
-import com.example.GesPro.Entite.Tache;
+import com.example.GesPro.Entite.Tache1;
 import com.example.GesPro.Service.TacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,13 +17,13 @@ public class TacheController {
     private TacheService tacheService;
 
     @GetMapping
-    public List<Tache> getAllTaches() {
+    public List<Tache1> getAllTaches() {
         return tacheService.getAllTaches();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tache> getTacheById(@PathVariable Long id) {
-        Tache tache = tacheService.getTacheById(id);
+    public ResponseEntity<Tache1> getTacheById(@PathVariable Long id) {
+        Tache1 tache = tacheService.getTacheById(id);
         if (tache != null) {
             return ResponseEntity.ok(tache);  // Status 200 OK
         } else {
@@ -32,8 +32,8 @@ public class TacheController {
     }
 
     @PostMapping
-    public ResponseEntity<Tache> createTache(@RequestBody Tache tache) {
-        Tache createdTache = tacheService.createTache(tache);
+    public ResponseEntity<Tache1> createTache(@RequestBody Tache1 tache) {
+        Tache1 createdTache = tacheService.createTache(tache);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTache);  // Status 201 Created
     }
 

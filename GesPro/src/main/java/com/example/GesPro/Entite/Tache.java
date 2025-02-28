@@ -1,9 +1,7 @@
 package com.example.GesPro.Entite;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-@Data
 @Entity
 public class Tache {
 
@@ -11,66 +9,54 @@ public class Tache {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String description;
-    private String status;
+    private Long userId;
+    private String title;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "projet_id", nullable = false)  // Clé étrangère vers Projet
     private Projet projet;
 
-    @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
-    private Utilisateur utilisateur;
-
     // Getters and Setters
-    // Getters
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public Long getUserId() {
+        return userId;
     }
 
-    public String getStatus() {
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Projet getProjet() {
         return projet;
     }
 
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
-    }
-
-    // Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public void setProjet(Projet projet) {
         this.projet = projet;
-    }
-
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
     }
 }

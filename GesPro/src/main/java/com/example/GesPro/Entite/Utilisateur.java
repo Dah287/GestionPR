@@ -17,7 +17,7 @@ public class Utilisateur {
     private String role;
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Tache> taches;
+    private List<Tache1> taches;
 
     // Getters and Setters
     // Getters
@@ -37,7 +37,7 @@ public class Utilisateur {
         return role;
     }
 
-    public List<Tache> getTaches() {
+    public List<Tache1> getTaches() {
         return taches;
     }
 
@@ -58,7 +58,7 @@ public class Utilisateur {
         this.role = role;
     }
 
-    public void setTaches(List<Tache> taches) {
+    public void setTaches(List<Tache1> taches) {
         this.taches = taches;
     }
 }

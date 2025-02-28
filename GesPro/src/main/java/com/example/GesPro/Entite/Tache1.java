@@ -1,13 +1,11 @@
 package com.example.GesPro.Entite;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
 @Data
 @Entity
-public class Projet {
+public class Tache1 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,13 +13,15 @@ public class Projet {
 
     private String name;
     private String description;
+    private String status;
 
     @ManyToOne
-    @JoinColumn(name = "responsable_id")
-    private Utilisateur responsable;
-    @JsonIgnore
-    @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Tache> taches;
+    @JoinColumn(name = "project_id")
+    private Projet projet;
+
+    @ManyToOne
+    @JoinColumn(name = "utilisateur_id")
+    private Utilisateur utilisateur;
 
     // Getters and Setters
     // Getters
@@ -37,12 +37,16 @@ public class Projet {
         return description;
     }
 
-    public Utilisateur getResponsable() {
-        return responsable;
+    public String getStatus() {
+        return status;
     }
 
-    public List<Tache> getTaches() {
-        return taches;
+    public Projet getProjet() {
+        return projet;
+    }
+
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
     }
 
     // Setters
@@ -58,11 +62,15 @@ public class Projet {
         this.description = description;
     }
 
-    public void setResponsable(Utilisateur responsable) {
-        this.responsable = responsable;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public void setTaches(List<Tache> taches) {
-        this.taches = taches;
+    public void setProjet(Projet projet) {
+        this.projet = projet;
+    }
+
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
     }
 }
