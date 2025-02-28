@@ -166,7 +166,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-    margin-top: 40px;
+    margin-top: 50px;
     margin-left: 125px;
   }
   
@@ -176,7 +176,7 @@
     color: white;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     border-radius: 15px;
   }
   
@@ -286,5 +286,40 @@
   }
   
 
-  
+  /* Titre de la tâche */
+.title-style {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #3498db; /* Bleu clair pour le titre */
+}
+
+/* Assigné - Nom de l'utilisateur */
+.assigned-style {
+  color: #2ecc71; /* Vert pour l'assignation */
+  font-size: 1rem;
+}
+
+/* Due Date - Date d'échéance */
+.due-date-style {
+  color: #f39c12; /* Orange pour la date */
+  font-size: 1rem;
+}
+
+/* Priorité - Couleur en fonction de la priorité */
+.priority-style {
+  font-weight: bold;
+}
+
+.priority-low {
+  color: #27ae60; /* Vert pour priorité basse */
+}
+
+.priority-medium {
+  color: #f39c12; /* Orange pour priorité moyenne */
+}
+
+.priority-high {
+  color: #e74c3c; /* Rouge pour priorité haute */
+}
+
   

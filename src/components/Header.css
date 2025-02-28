@@ -41,8 +41,8 @@
 .search-bar input {
     border: none;
     outline: none;
-    width: 240px;
-    font-size: 14px;
+    width: 350px;
+    font-size: 16px;
     padding: 8px;
 }
 
@@ -54,11 +54,12 @@
 
 .header-btn {
     background-color: white;
+    width: 100px;
     color: #4CAF50;
     border: 1px solid #4CAF50;
     border-radius: 20px;
     padding: 8px 15px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
 }

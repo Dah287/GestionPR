@@ -22,9 +22,10 @@ function App() {
           <div className="content">
             <div className="container-fluid">
               <Routes>
-                <Route exact path="/" element={<Board />} />
-                <Route exact path="/list" element={<TaskList />} />
-                <Route exact path="/projet" element={<Projet/>} />
+                <Route exact path="/" element={<Projet/>} /> 
+                <Route  path="/board" element={<Board />} />
+                <Route  path="/list" element={<TaskList />} />
+      
 
                 {/* Autres routes si nécessaire */}
               </Routes>

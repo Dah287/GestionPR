@@ -15,10 +15,12 @@ export default function TaskList() {
     fetch(`http://localhost:8080/projets/${projetId}/taches`) // Charge les tâches du projet
       .then((response) => response.json())
       .then((json) => {
+              console.log('donnes : ',json)
         setTodo(json.filter((task) => task.status === "TODO"));
         setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
         setDone(json.filter((task) => task.status === "DONE"));
       });
+
   }, []);
 
   const handleDragEnd = (result) => {
@@ -88,10 +90,13 @@ export default function TaskList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [task, setTask] = useState({
     title: '',
-    userId: '',
-    status: 'TODO', // Par exemple
-    projet: { id: '' }, // Projet sous forme d'objet avec un champ id
-  });
+    status: 'TODO', // Statut par défaut
+    dueDate: '', // Date d'échéance de la tâche
+    priority: '', // Priorité de la tâche
+    utilisateur: { id: ''}, // Assigner un utilisateur
+    projet: { id: '' }, // Associer à un projet
+});
+
   
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -103,12 +108,20 @@ export default function TaskList() {
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+  
     if (name === 'projetId') {
       setTask({
         ...task,
-        projet: { id: value }, // Mise à jour de l'objet projet avec le champ id
+        projet: { id: value }, // Mise à jour du projet
+      });
+    } else if (name === 'utilisateur') {
+      // Mise à jour de l'utilisateur assigné
+      setTask({
+        ...task,
+        utilisateur: { id: value }, // Stocke seulement l'ID de l'utilisateur
       });
     } else {
+      // Mise à jour des autres champs directement
       setTask({
         ...task,
         [name]: value,
@@ -116,10 +129,11 @@ export default function TaskList() {
     }
   };
   
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const projetId = localStorage.getItem("selectedProjet"); // Récupération du projet ID
+    const projetId = localStorage.getItem("selectedProjet");
     if (!projetId) {
       alert("Projet non sélectionné !");
       return;
@@ -128,12 +142,14 @@ export default function TaskList() {
     const newTask = {
       ...task,
       projet: {
-        id: parseInt(projetId), // Associer la tâche au projet sous forme d'objet
+        id: parseInt(projetId),
       },
     };
   
+    console.log("new task :", newTask);
+  
     try {
-      const response = await fetch("http://localhost:8080/api/tasks", {
+      const response = await fetch(`http://localhost:8080/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,11 +181,14 @@ export default function TaskList() {
   
       setIsModalOpen(false); // Fermer la modal après succès
       setTask({ title: "", userId: "", status: "TODO", projet: { id: "" } }); // Réinitialiser le formulaire
+
+      window.location.reload(); // Cela va recharger la page
     } catch (error) {
       console.error("Erreur :", error);
       alert("Une erreur est survenue lors de l'ajout de la tâche.");
     }
   };
+  
   
   
 
@@ -197,26 +216,41 @@ export default function TaskList() {
                   required
                 />
               </div>
-              <div>
-                <label>Utilisateur ID</label>
-                <input
-                  type="number"
-                  name="userId"
-                  value={task.userId}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <label>Statut</label>
+              <div className="input-container">
+              <label className="input-label">Due Date</label>
+              <input
+                type="date"
+                name="dueDate"
+                value={task.dueDate}
+                onChange={handleInputChange}
+                required
+                className="input-field due-date"
+              />
+            </div>
+
+            <div>
+                <label> Priority </label>
                 <select
-                  name="status"
-                  value={task.status}
+                  name="priority"
+                  value={task.priority}
                   onChange={handleInputChange}
                 >
-                  <option value="TODO">À faire</option>
-                  <option value="IN_PROGRESS">En cours</option>
-                  <option value="DONE">Terminé</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </div>
+              <div>
+                <label> Assigné </label>
+                <select
+                  name="utilisateur"
+                  value={task.utilisateur ? task.utilisateur.id : ""}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
+                  <option value="1">user 1</option>
+                  <option value="2">user 2</option>
+                  <option value="3">user 3</option>
                 </select>
               </div>
 
@@ -257,23 +291,23 @@ export default function TaskList() {
     todo.map((task, index) => (
       <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
         {(provided) => (
-          <li
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className="task-item"
-          >
-            <span className="task-title">{task.title}</span>
-            <span className="task-info">
-              <FaUser /> Assigné
-            </span>
-            <span className="task-info">
-              <FaCalendarAlt /> Due Date
-            </span>
-            <span className={`task-info priority-${task.priority?.toLowerCase()}`}>
-              <FaFlag /> Priorité
-            </span>
-          </li>
+                          <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="task-item"
+                        >
+                          <span className="task-title ">{task.title}</span>
+                          <span className="task-info assigned-style">
+                          <FaUser /> Assigné : <strong>{task.utilisateur ? task.utilisateur.nom : "Non assigné"}</strong>
+                          </span>
+                          <span className="task-info due-date-style">
+                            <FaCalendarAlt /> Due Date : <strong>{  task.dueDate}</strong> 
+                          </span>
+                          <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
+                            <FaFlag /> Priorité : <strong>{task.priority}</strong>
+                          </span>
+                        </li>
         )}
       </Draggable>
     ))
@@ -310,23 +344,23 @@ export default function TaskList() {
                     inProgress.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
                         {(provided) => (
-                            <li
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="task-item"
-                            >
-                            <span className="task-title">{task.title}</span>
-                            <span className="task-info">
-                                <FaUser /> Assigné
-                            </span>
-                            <span className="task-info">
-                                <FaCalendarAlt /> Due Date
-                            </span>
-                            <span className={`task-info priority-${task.priority?.toLowerCase()}`}>
-                                <FaFlag /> Priorité
-                            </span>
-                            </li>
+                          <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="task-item"
+                        >
+                          <span className="task-title ">{task.title}</span>
+                          <span className="task-info assigned-style">
+                          <FaUser /> Assigné : <strong>{task.utilisateur ? task.utilisateur.nom : "Non assigné"}</strong>
+                          </span>
+                          <span className="task-info due-date-style">
+                            <FaCalendarAlt /> Due Date : <strong>{  task.dueDate}</strong> 
+                          </span>
+                          <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
+                            <FaFlag /> Priorité : <strong>{task.priority}</strong>
+                          </span>
+                        </li>
                         )}
                       </Draggable>
                     ))
@@ -362,23 +396,24 @@ export default function TaskList() {
                     done.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
                         {(provided) => (
-                            <li
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="task-item"
-                            >
-                            <span className="task-title">{task.title}</span>
-                            <span className="task-info">
-                                <FaUser /> Assigné
-                            </span>
-                            <span className="task-info">
-                                <FaCalendarAlt /> Due Date
-                            </span>
-                            <span className={`task-info priority-${task.priority?.toLowerCase()}`}>
-                                <FaFlag /> Priorité
-                            </span>
-                            </li>
+                          <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="task-item"
+                        >
+                          <span className="task-title ">{task.title}</span>
+                          <span className="task-info assigned-style">
+                          <FaUser /> Assigné : <strong>{task.utilisateur ? task.utilisateur.nom : "Non assigné"}</strong>
+                          </span>
+                          <span className="task-info due-date-style">
+                            <FaCalendarAlt /> Due Date : <strong>{  task.dueDate}</strong> 
+                          </span>
+                          <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
+                            <FaFlag /> Priorité : <strong>{task.priority}</strong>
+                          </span>
+                        </li>
+
                         )}
                       </Draggable>
                     ))
