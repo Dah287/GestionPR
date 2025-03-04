@@ -1,0 +1,127 @@
+import React, { useState, useEffect } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import './Dashboard.css'; // Importation du fichier CSS pour le style
+
+// Enregistrement des éléments de chart.js nécessaires
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const Dashboard = () => {
+  const [projets, setProjets] = useState([]);
+  const [tasksByStatus, setTasksByStatus] = useState({});
+  const [tasksByAssignee, setTasksByAssignee] = useState({});
+  const [tasksDue, setTasksDue] = useState({ dueThisWeek: 0, overdue: 0 });
+
+  useEffect(() => {
+    fetch("http://localhost:8080/projets")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((text) => {
+        if (!text) {
+          throw new Error("Réponse vide");
+        }
+        return JSON.parse(text);
+      })
+      .then((data) => {
+        if (!Array.isArray(data)) {
+          throw new Error("Format JSON invalide : attendu un tableau");
+        }
+
+        const projetsAvecTaches = data.map((projet) =>
+          fetch(`http://localhost:8080/projets/${projet.id}/taches`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((taches) => ({ ...projet, taches }))
+            .catch((error) => {
+              console.error(`Erreur lors du chargement des tâches du projet ${projet.id}`, error);
+              return { ...projet, taches: [] };
+            })
+        );
+
+        return Promise.all(projetsAvecTaches);
+      })
+      .then((projetsFinal) => {
+        setProjets(projetsFinal);
+
+        // Calculer les tâches par statut et par assigné
+        const statusCounts = {};
+        const assigneeCounts = {};
+        let dueThisWeek = 0;
+        let overdue = 0;
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+
+        projetsFinal.forEach((projet) => {
+          projet.taches.forEach((tache) => {
+            statusCounts[tache.status] = (statusCounts[tache.status] || 0) + 1;
+            assigneeCounts[tache.utilisateur.nom] = (assigneeCounts[tache.utilisateur.nom] || 0) + 1;
+            
+            const dueDate = new Date(tache.dueDate);
+            if (dueDate < today) {
+              overdue += 1;
+            } else if (dueDate >= today && dueDate <= nextWeek) {
+              dueThisWeek += 1;
+            }
+          });
+        });
+
+        setTasksByStatus(statusCounts);
+        setTasksByAssignee(assigneeCounts);
+        setTasksDue({ dueThisWeek, overdue });
+      })
+      .catch((error) => console.error("Erreur lors du chargement des projets :", error));
+  }, []);
+
+  return (
+    <div className="dashboard-container">
+      <h2 className="dashboard-title">Dashboard</h2>
+      <div className="charts-container">
+        <div className="chart-box">
+          <h3>Tâches par statut</h3>
+          <Bar data={{
+            labels: Object.keys(tasksByStatus),
+            datasets: [{
+              label: 'Nombre de tâches par statut',
+              data: Object.values(tasksByStatus),
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            }],
+          }} />
+        </div>
+        <div className="chart-box">
+          <h3>Total Tasks by Assignee</h3>
+          <Bar data={{
+            labels: Object.keys(tasksByAssignee),
+            datasets: [{
+              label: 'Nombre de tâches par assigné',
+              data: Object.values(tasksByAssignee),
+              backgroundColor: 'rgba(153, 102, 255, 0.2)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              borderWidth: 1,
+            }],
+          }} />
+        </div>
+        <div className="chart-box tasks-due">
+        <h3>Tâches à échéance cette semaine ou en retard</h3>
+        <div className="tasks-due-details">
+            <p>📅 À échéance cette semaine : <span>{tasksDue.dueThisWeek}</span></p>
+            <p>⚠️ En retard : <span>{tasksDue.overdue}</span></p>
+        </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

@@ -9,14 +9,30 @@ const TaskBoard = () => {
     const [done, setDone] = useState([]);
     const projetId = localStorage.getItem("selectedProjet");
     useEffect(() => {
-        fetch(`http://localhost:8080/projets/${projetId}/taches`)
-            .then((response) => response.json())
-            .then((json) => {
-                setTodo(json.filter((task) => task.status === "TODO"));
-                setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
-                setDone(json.filter((task) => task.status === "DONE"));
-            });
-    }, []);
+        const fetchTaches = async () => {
+          try {
+            const response = await fetch(`http://localhost:8080/projets/${projetId}/taches`);
+            
+            if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+      
+            const json = await response.json();
+            console.log("Données reçues :", json);
+      
+            setTodo(json.filter((task) => task.status === "TODO"));
+            setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
+            setDone(json.filter((task) => task.status === "DONE"));
+          } catch (error) {
+            console.error("Erreur lors du chargement des tâches :", error);
+          }
+        };
+      
+        if (projetId) {
+          fetchTaches();
+        }
+      }, [projetId]); // Ajoute projetId comme dépendance
+      
 
     const handleDragEnd = (result) => {
         const { destination, source, draggableId } = result;
@@ -105,7 +121,7 @@ const TaskBoard = () => {
         <DragDropContext onDragEnd={handleDragEnd}>
             <h2 style={{ textAlign: "center" }}>Tableau de tâches</h2>
             <div style={{ display: "flex", justifyContent: "space-between", width: "90%", margin: "0 auto",paddingLeft:"110px" }}>
-                <Column title={"À Faire"} tasks={todo} id={"1"} style={{ flexGrow: 1 }} />
+                <Column title={"À Faire"} tasks={todo} id={"1"} style={{ flexGrow: 1 ,}} />
                 <Column title={"En Cours"} tasks={inProgress} id={"2"} style={{ flexGrow: 1 }} />
                 <Column title={"Terminées"} tasks={done} id={"3"} style={{ flexGrow: 1 }} />
             </div>

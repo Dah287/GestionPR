@@ -6,6 +6,9 @@ import TaskList from './components/TaskList';
 import Nav from './components/Nav';  // Import du composant Nav
 import Header from './components/Header'; // Import du composant Header
 import Projet from './components/Projet';
+import Dashboard from './components/Dashboard';
+
+import ChatTemplate from './components/ChatTemplate';
 
 function App() {
   return (
@@ -25,8 +28,8 @@ function App() {
                 <Route exact path="/" element={<Projet/>} /> 
                 <Route  path="/board" element={<Board />} />
                 <Route  path="/list" element={<TaskList />} />
-      
-
+                <Route  path="/dashboard" element={<Dashboard />} />
+                <Route  path="/chat" element={<ChatTemplate />} />
                 {/* Autres routes si nécessaire */}
               </Routes>
             </div>

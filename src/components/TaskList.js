@@ -12,16 +12,30 @@ export default function TaskList() {
 
   const projetId = localStorage.getItem("selectedProjet");
   useEffect(() => {
-    fetch(`http://localhost:8080/projets/${projetId}/taches`) // Charge les tâches du projet
-      .then((response) => response.json())
-      .then((json) => {
-              console.log('donnes : ',json)
+    const fetchTaches = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/projets/${projetId}/taches`);
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+  
+        const json = await response.json();
+        console.log("Données reçues :", json);
+  
         setTodo(json.filter((task) => task.status === "TODO"));
         setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
         setDone(json.filter((task) => task.status === "DONE"));
-      });
-
-  }, []);
+      } catch (error) {
+        console.error("Erreur lors du chargement des tâches :", error);
+      }
+    };
+  
+    if (projetId) {
+      fetchTaches();
+    }
+  }, [projetId]); // Ajoute projetId comme dépendance
+  
 
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -88,6 +102,8 @@ export default function TaskList() {
   }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isModalOpenn, setIsModalOpenn] = useState(false);
   const [task, setTask] = useState({
     title: '',
     status: 'TODO', // Statut par défaut
@@ -96,6 +112,58 @@ export default function TaskList() {
     utilisateur: { id: ''}, // Assigner un utilisateur
     projet: { id: '' }, // Associer à un projet
 });
+// update task
+const [selectedTask, setSelectedTask] = useState({
+  title: '',
+ // Statut par défaut
+  dueDate: '', // Date d'échéance de la tâche
+  priority: '', // Priorité de la tâche
+  utilisateur: { id: ''}, // Assigner un utilisateur
+
+});
+
+const handleTaskDoubleClick = (task) => {
+  setSelectedTask(task);
+  setIsModalOpenn(true);
+};
+
+const handleCloseModal2 = () => {
+  setIsModalOpenn(false);
+  setSelectedTask(null);
+};
+
+const handleInputChange2 = (e) => {
+  const { name, value } = e.target;
+  
+if (name === 'utilisateur2') {
+    // Mise à jour de l'utilisateur assigné
+    setSelectedTask({
+      ...selectedTask,
+      utilisateur: { id: value }, // Stocke seulement l'ID de l'utilisateur
+    });
+  } else {
+    // Mise à jour des autres champs directement
+    setSelectedTask({
+      ...selectedTask,
+      [name]: value,
+    });
+  }
+};
+const handleSubmit2 = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch(`http://localhost:8080/api/tasks/tache/${selectedTask.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selectedTask),
+    });
+    if (!response.ok) throw new Error("Erreur lors de la modification de la tâche");
+    setIsModalOpenn(false);
+    window.location.reload();
+  } catch (error) {
+    console.error("Erreur :", error);
+  }
+};
 
   
   const handleOpenModal = () => {
@@ -201,10 +269,11 @@ export default function TaskList() {
           Ajouter une tâche
         </button>
       </div>
+        {/* Ajouter Tache */}
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <h4>Créer ou Modifier une Tâche</h4>
+            <h4>Crée une Tâche</h4>
             <form onSubmit={handleSubmit}>
               <div>
                 <label>Titre</label>
@@ -235,6 +304,7 @@ export default function TaskList() {
                   value={task.priority}
                   onChange={handleInputChange}
                 >
+                  <option value="">Sélectionner une priorité</option>
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
                   <option value="HIGH">HIGH</option>
@@ -257,6 +327,71 @@ export default function TaskList() {
               <div className="modal-actions">
                 <button type="submit">Enregistrer</button>
                 <button type="button" onClick={handleCloseModal}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+              {/* Modifier Tache */}
+              {isModalOpenn && selectedTask &&(
+        <div className="modal">
+          <div className="modal-content">
+            <h4>Modifier une Tâche</h4>
+            <form onSubmit={handleSubmit2}>
+              <div>
+                <label>Titre</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={selectedTask.title}
+                  onChange={handleInputChange2}
+                  required
+                />
+              </div>
+              <div className="input-container">
+              <label className="input-label">Due Date</label>
+              <input
+                type="date"
+                name="dueDate"
+                value={selectedTask.dueDate}
+                onChange={handleInputChange2}
+                required
+                className="input-field due-date"
+              />
+            </div>
+
+            <div>
+                <label> Priority </label>
+                <select
+                  name="priority"
+                  value={selectedTask.priority}
+                  onChange={handleInputChange2}
+                >
+                  <option value="">Sélectionner une priorité</option>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="HIGH">HIGH</option>
+                </select>
+              </div>
+              <div>
+                <label> Assigné </label>
+                <select
+                  name="utilisateur2"
+                  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
+                  onChange={handleInputChange2}
+                >
+                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
+                  <option value="1">user 1</option>
+                  <option value="2">user 2</option>
+                  <option value="3">user 3</option>
+                </select>
+              </div>
+
+              <div className="modal-actions">
+                <button type="submit">Enregistrer</button>
+                <button type="button" onClick={handleCloseModal2}>
                   Annuler
                 </button>
               </div>
@@ -295,6 +430,7 @@ export default function TaskList() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          onDoubleClick={() => handleTaskDoubleClick(task)}
                           className="task-item"
                         >
                           <span className="task-title ">{task.title}</span>
@@ -348,6 +484,7 @@ export default function TaskList() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          onDoubleClick={() => handleTaskDoubleClick(task)}
                           className="task-item"
                         >
                           <span className="task-title ">{task.title}</span>
@@ -400,6 +537,7 @@ export default function TaskList() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          onDoubleClick={() => handleTaskDoubleClick(task)}
                           className="task-item"
                         >
                           <span className="task-title ">{task.title}</span>
