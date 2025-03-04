@@ -37,12 +37,19 @@ public class TaskController {
         return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Mettre à jour une tâche
+    // Mettre à jour une tâche status
     @PutMapping("/{id}")
     public ResponseEntity<Tache> updateTask(@PathVariable Long id, @RequestBody Tache taskDetails) {
         Tache updatedTask = taskService.updateTask(id, taskDetails);
         return ResponseEntity.ok(updatedTask);
     }
+    // Mettre à jour une tâche
+    @PutMapping("/tache/{id}")
+    public ResponseEntity<Tache> updateTaskk(@PathVariable Long id, @RequestBody Tache taskDetails) {
+        Tache updatedTask = taskService.updateTaskk(id, taskDetails);
+        return ResponseEntity.ok(updatedTask);
+    }
+
 
     // Supprimer une tâche
     @DeleteMapping("/{id}")

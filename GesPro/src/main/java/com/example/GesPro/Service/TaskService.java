@@ -24,12 +24,19 @@ public class TaskService {
         return taskRepository.findById(id);
     }
 
-    // Mettre à jour une tâche
+    // Mettre à jour une tâche Status
     public Tache updateTask(Long id, Tache taskDetails) {
         Tache task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
-        task.setUserId(taskDetails.getUserId());
-        task.setTitle(taskDetails.getTitle());
         task.setStatus(taskDetails.getStatus());
+        return taskRepository.save(task);
+    }
+    // Mettre à jour une tâche
+    public Tache updateTaskk(Long id, Tache taskDetails) {
+        Tache task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setDueDate(taskDetails.getDueDate());
+        task.setPriority(taskDetails.getPriority());
+        task.setTitle(taskDetails.getTitle());
+        task.setUtilisateur(taskDetails.getUtilisateur());
         return taskRepository.save(task);
     }
     // Récupérer toutes les tâches

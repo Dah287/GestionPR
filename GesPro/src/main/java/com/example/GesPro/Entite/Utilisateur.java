@@ -1,5 +1,6 @@
 package com.example.GesPro.Entite;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,9 +16,9 @@ public class Utilisateur {
     private String nom;
     private String email;
     private String role;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Tache1> taches;
+    private List<Tache> taches;
 
     // Getters and Setters
     // Getters
@@ -37,7 +38,7 @@ public class Utilisateur {
         return role;
     }
 
-    public List<Tache1> getTaches() {
+    public List<Tache> getTaches() {
         return taches;
     }
 
@@ -58,7 +59,7 @@ public class Utilisateur {
         this.role = role;
     }
 
-    public void setTaches(List<Tache1> taches) {
+    public void setTaches(List<Tache> taches) {
         this.taches = taches;
     }
 }
