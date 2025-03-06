@@ -9,6 +9,7 @@ import Projet from './components/Projet';
 import Dashboard from './components/Dashboard';
 
 import ChatTemplate from './components/ChatTemplate';
+import Login from './components/Login';
 
 function App() {
   return (
@@ -19,17 +20,19 @@ function App() {
 
         <div className="main-content">
           {/* Navigation à gauche */}
-          <Nav />
+       
 
           {/* Contenu principal, avec un margin-left pour ne pas être caché par la nav */}
           <div className="content">
             <div className="container-fluid">
               <Routes>
-                <Route exact path="/" element={<Projet/>} /> 
+              <Route  path="/" element={<Login />} />
+                <Route exact path="/projet" element={<Projet/>} /> 
                 <Route  path="/board" element={<Board />} />
                 <Route  path="/list" element={<TaskList />} />
                 <Route  path="/dashboard" element={<Dashboard />} />
                 <Route  path="/chat" element={<ChatTemplate />} />
+                
                 {/* Autres routes si nécessaire */}
               </Routes>
             </div>

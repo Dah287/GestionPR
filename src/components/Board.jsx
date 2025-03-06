@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import Column from "./Column";
-
+import "./TaskList.css";
 const TaskBoard = () => {
     const [todo, setTodo] = useState([]);
     const [inProgress, setInProgress] = useState([]);
@@ -11,7 +11,7 @@ const TaskBoard = () => {
     useEffect(() => {
         const fetchTaches = async () => {
           try {
-            const response = await fetch(`http://localhost:8080/projets/${projetId}/taches`);
+            const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`);
             
             if (!response.ok) {
               throw new Error(`Erreur HTTP: ${response.status}`);
@@ -80,7 +80,7 @@ const TaskBoard = () => {
 
     function updateTaskInDatabase(task) {
         console.log("Updating task in DB:", task); // Debugger pour voir la tâche envoyée
-        fetch(`http://localhost:8080/api/tasks/${task.id}`, {
+        fetch(`http://localhost:8081/api/tasks/${task.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(task)
@@ -118,14 +118,16 @@ const TaskBoard = () => {
     };
 
     return (
+        <div className="tasks-list-container">
         <DragDropContext onDragEnd={handleDragEnd}>
             <h2 style={{ textAlign: "center" }}>Tableau de tâches</h2>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "90%", margin: "0 auto",paddingLeft:"110px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "90%" }}>
                 <Column title={"À Faire"} tasks={todo} id={"1"} style={{ flexGrow: 1 ,}} />
                 <Column title={"En Cours"} tasks={inProgress} id={"2"} style={{ flexGrow: 1 }} />
                 <Column title={"Terminées"} tasks={done} id={"3"} style={{ flexGrow: 1 }} />
             </div>
         </DragDropContext>
+        </div>
     );
     
 };

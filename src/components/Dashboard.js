@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [tasksDue, setTasksDue] = useState({ dueThisWeek: 0, overdue: 0 });
 
   useEffect(() => {
-    fetch("http://localhost:8080/projets")
+    fetch("http://localhost:8081/projets")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -32,7 +32,7 @@ const Dashboard = () => {
         }
 
         const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://localhost:8080/projets/${projet.id}/taches`)
+          fetch(`http://localhost:8081/projets/${projet.id}/taches`)
             .then((response) => {
               if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
@@ -82,6 +82,7 @@ const Dashboard = () => {
   }, []);
 
   return (
+    <div className='tasks-list-container'>
     <div className="dashboard-container">
       <h2 className="dashboard-title">Dashboard</h2>
       <div className="charts-container">
@@ -120,6 +121,7 @@ const Dashboard = () => {
         </div>
 
       </div>
+    </div>
     </div>
   );
 };

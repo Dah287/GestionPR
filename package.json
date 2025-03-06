@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "ant": "^0.2.0",
     "antd": "^5.13.3",
+    "axios": "^1.8.1",
     "chart.js": "^4.4.8",
     "frappe-gantt": "^1.0.3",
     "lucide-react": "^0.475.0",

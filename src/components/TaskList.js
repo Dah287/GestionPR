@@ -14,7 +14,7 @@ export default function TaskList() {
   useEffect(() => {
     const fetchTaches = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/projets/${projetId}/taches`);
+        const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`);
         
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -83,7 +83,7 @@ export default function TaskList() {
 
   function updateTaskInDatabase(task) {
     console.log("Updating task in DB:", task);
-    fetch(`http://localhost:8080/api/tasks/${task.id}`, {
+    fetch(`http://localhost:8081/api/tasks/${task.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
@@ -152,7 +152,7 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://localhost:8080/api/tasks/tache/${selectedTask.id}`, {
+    const response = await fetch(`http://localhost:8081/api/tasks/tache/${selectedTask.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(selectedTask),
@@ -217,7 +217,7 @@ const handleSubmit2 = async (e) => {
     console.log("new task :", newTask);
   
     try {
-      const response = await fetch(`http://localhost:8080/api/tasks`, {
+      const response = await fetch(`http://localhost:8081/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -305,9 +305,9 @@ const handleSubmit2 = async (e) => {
                   onChange={handleInputChange}
                 >
                   <option value="">Sélectionner une priorité</option>
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="HIGH">HIGH</option>
+                  <option value="Low">Faible</option>
+                  <option value="Medium">Moyen</option>
+                  <option value="HIGH">HAUT</option>
                 </select>
               </div>
               <div>
@@ -370,9 +370,9 @@ const handleSubmit2 = async (e) => {
                   onChange={handleInputChange2}
                 >
                   <option value="">Sélectionner une priorité</option>
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="HIGH">HIGH</option>
+                  <option value="Low">Faible</option>
+                  <option value="Medium">Moyen</option>
+                  <option value="HIGH">HAUT</option>
                 </select>
               </div>
               <div>

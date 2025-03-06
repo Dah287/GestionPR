@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from "react";
 import "./Projet.css";
 import { useNavigate } from "react-router-dom";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash,FaPlus  } from "react-icons/fa";
 
 const Projet = () => {
   const [projets, setProjets] = useState([]);
   const [selectedProjet, setSelectedProjet] = useState(
     localStorage.getItem("selectedProjet") || null
   );
+
+  const idUtilisateur = localStorage.getItem("id_utilisateur");
   const [showModal, setShowModal] = useState(false);
   const [newProjet, setNewProjet] = useState({
     name: "",
     description: "",
+    responsable : {
+        id: ""
+    }
   });
 
   useEffect(() => {
-    fetch("http://localhost:8080/projets")
+
+    // if (!idUtilisateur) {
+    //     console.error("Aucun utilisateur connecté !");
+    //     return;
+    //   }
+    fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -35,7 +45,7 @@ const Projet = () => {
         }
 
         const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://localhost:8080/projets/${projet.id}/taches`)
+          fetch(`http://localhost:8081/projets/${projet.id}/taches`)
             .then((response) => {
               if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
@@ -57,11 +67,18 @@ const Projet = () => {
       .catch((error) => console.error("Erreur lors du chargement des projets :", error));
   }, []);
 
+  const newProjet1 = {
+    ...newProjet,
+    responsable: {
+      id: parseInt(idUtilisateur),
+    },
+  };
+
   const handleAddProject = () => {
-    fetch("http://localhost:8080/projets", {
+    fetch("http://localhost:8081/projets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newProjet),
+      body: JSON.stringify(newProjet1),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -74,7 +91,7 @@ const Projet = () => {
 
   const handleDeleteProject = (projetId) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
-      fetch(`http://localhost:8080/projets/${projetId}`, {
+      fetch(`http://localhost:8081/projets/${projetId}`, {
         method: "DELETE",
       })
         .then((response) => {
@@ -112,8 +129,9 @@ const Projet = () => {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h3>Liste des projets</h3>
         <button className="add-task-btn" onClick={() => setShowModal(true)}>
-          Ajouter projet
+            <FaPlus className="icon" /> Ajouter projet
         </button>
+
       </div>
       <div className="project-list">
         {projets.map((projet) => (
