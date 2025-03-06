@@ -37,4 +37,11 @@ public class UtilisateurService {
         }
         return false;  // Retourne false si l'utilisateur n'existe pas
     }
+
+    // Méthode pour vérifier l'authentification de l'utilisateur
+    public Utilisateur login(String email, String nom) {
+        Optional<Utilisateur> utilisateur = utilisateurRepository.findByNomAndPassword(email, nom);
+        return utilisateur.orElse(null); // Renvoie l'utilisateur trouvé ou null
+    }
+
 }

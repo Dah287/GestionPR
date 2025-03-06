@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/utilisateurs")
 public class UtilisateurController {
 
@@ -43,4 +45,16 @@ public class UtilisateurController {
         utilisateurService.deleteUtilisateur(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();  // Status 204 No Content
     }
+    @PostMapping("login")
+    public ResponseEntity<Utilisateur> login(@RequestBody Utilisateur loginRequest) {
+        Optional<Utilisateur> utilisateurOpt = Optional.ofNullable(utilisateurService.login(loginRequest.getNom(), loginRequest.getPassword()));
+
+        if (utilisateurOpt.isPresent()) {
+            Utilisateur utilisateur = utilisateurOpt.get();
+            return ResponseEntity.ok(utilisateur); // Renvoie les détails de l'utilisateur, y compris l'ID
+        }
+
+        return ResponseEntity.status(401).body(null); // Unauthorized si les identifiants sont incorrects
+    }
+
 }

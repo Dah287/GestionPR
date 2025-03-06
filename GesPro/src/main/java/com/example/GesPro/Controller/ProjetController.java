@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/projets")
 public class ProjetController {
@@ -57,6 +57,11 @@ public class ProjetController {
             return ResponseEntity.noContent().build(); // Retourner 204 si aucune tâche n'est trouvée
         }
         return ResponseEntity.ok(taches); // Retourner les tâches avec un code 200 OK
+    }
+    // Méthode pour récupérer les projets par responsable
+    @GetMapping("/responsable/{id}")
+    public List<Projet> getProjetsByResponsableId(@PathVariable Long id) {
+        return projetService.getProjetsByResponsableId(id); // Renvoie les projets associés à l'ID du responsable
     }
 
 }

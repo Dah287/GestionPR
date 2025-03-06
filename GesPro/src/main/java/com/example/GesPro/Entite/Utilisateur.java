@@ -15,6 +15,7 @@ public class Utilisateur {
 
     private String nom;
     private String email;
+    private String password;
     private String role;
     @JsonIgnore
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -32,6 +33,10 @@ public class Utilisateur {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getRole() {
@@ -53,6 +58,9 @@ public class Utilisateur {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setRole(String role) {

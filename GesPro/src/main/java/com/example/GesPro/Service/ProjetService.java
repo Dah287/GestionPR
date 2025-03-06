@@ -46,4 +46,8 @@ public class ProjetService {
         }
         return Collections.emptyList(); // Retourner une liste vide si le projet n'existe pas
     }
+    // Méthode pour récupérer les projets par ID du responsable
+    public List<Projet> getProjetsByResponsableId(Long responsableId) {
+        return projetRepository.findByResponsableId(responsableId);
+    }
 }
