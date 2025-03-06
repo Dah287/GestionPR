@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2025 at 02:23 PM
+-- Generation Time: Mar 06, 2025 at 11:48 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,9 +39,10 @@ CREATE TABLE `projet` (
 --
 
 INSERT INTO `projet` (`id`, `responsable_id`, `description`, `name`) VALUES
-(1, NULL, 'Dévelopement de app 2', 'Projet 1'),
-(2, NULL, 'Dévelopement de app 2', 'Projet 2'),
-(3, NULL, 'Dévelopement de app 2', 'Projet 3');
+(1, 1, 'Dévelopement de app 2', 'Projet 1'),
+(2, 1, 'Dévelopement de app 2', 'Projet 2'),
+(3, 2, 'Dévelopement de app 2', 'Projet 3'),
+(9, 2, '', '');
 
 -- --------------------------------------------------------
 
@@ -72,9 +73,10 @@ INSERT INTO `tache` (`id`, `projet_id`, `user_id`, `due_date`, `priority`, `titl
 (8, 2, 1, '2024-03-21', 'low', 'Tache', 'IN_PROGRESS'),
 (9, 2, 1, '2024-03-21', 'low', 'Tache', 'IN_PROGRESS'),
 (10, 3, 1, '2024-03-21', 'low', 'Tache', 'TODO'),
-(11, 1, 1, '2025-03-03', 'Medium', 'ee', 'TODO'),
+(11, 1, 1, '2025-03-06', 'Medium', 'ee', 'TODO'),
 (17, 2, 1, '2025-02-26', 'Low', 'vvvvv', 'DONE'),
-(18, 2, 3, '2025-03-03', 'Low', 'wwwwwwww', 'IN_PROGRESS');
+(18, 2, 3, '2025-03-03', 'Low', 'wwwwwwww', 'IN_PROGRESS'),
+(19, 9, 1, '2025-03-04', 'Low', 'qqq', 'TODO');
 
 -- --------------------------------------------------------
 
@@ -126,17 +128,18 @@ CREATE TABLE `utilisateur` (
   `id` bigint(20) NOT NULL,
   `email` varchar(255) DEFAULT NULL,
   `nom` varchar(255) DEFAULT NULL,
-  `role` varchar(255) DEFAULT NULL
+  `role` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `utilisateur`
 --
 
-INSERT INTO `utilisateur` (`id`, `email`, `nom`, `role`) VALUES
-(1, 'brahim.dupont@example.com', 'dahman', 'Chef de projet'),
-(2, 'brahim.dupont@example.com', 'brahim', 'Chef de projet'),
-(3, 'brahim.dupont@example.com', 'hasnae', 'Chef de projet');
+INSERT INTO `utilisateur` (`id`, `email`, `nom`, `role`, `password`) VALUES
+(1, 'brahim', 'brahim', 'Chef de projet', 'brahim'),
+(2, 'brahim1.dupont@example.com', 'brahim1', 'Chef de projet', 'brahim1'),
+(3, 'brahim2.dupont@example.com', 'brahim2', 'Chef de projet', 'brahim2');
 
 --
 -- Indexes for dumped tables
@@ -185,13 +188,13 @@ ALTER TABLE `utilisateur`
 -- AUTO_INCREMENT for table `projet`
 --
 ALTER TABLE `projet`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `tache`
 --
 ALTER TABLE `tache`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `tache1`
