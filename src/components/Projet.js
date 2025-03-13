@@ -124,6 +124,11 @@ const Projet = () => {
     window.location.href = "/list";
   };
 
+  const userId = localStorage.getItem("id_utilisateur");
+  if (!userId) {
+    return null;
+  }
+
   return (
     <div className="tasks-list-container">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

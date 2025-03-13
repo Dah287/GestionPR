@@ -10,6 +10,8 @@ import Dashboard from './components/Dashboard';
 
 import ChatTemplate from './components/ChatTemplate';
 import Login from './components/Login';
+import MesTaches from './components/User/MesTaches';
+import ChatTemplatee from './components/ChatTemplatee';
 
 function App() {
   return (
@@ -32,7 +34,8 @@ function App() {
                 <Route  path="/list" element={<TaskList />} />
                 <Route  path="/dashboard" element={<Dashboard />} />
                 <Route  path="/chat" element={<ChatTemplate />} />
-                
+                <Route  path="/MesTaches" element={<MesTaches />} />
+                <Route  path="/msg" element={<ChatTemplatee />} />
                 {/* Autres routes si nécessaire */}
               </Routes>
             </div>

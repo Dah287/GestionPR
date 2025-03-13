@@ -3,19 +3,19 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import "./TaskList.css";
-export default function TaskList() {
+import "../TaskList.css";
+export default function MesTaches() {
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
   //const { id } = useParams();
-
+  const userId = localStorage.getItem("id_utilisateur");
 
   const projetId = localStorage.getItem("selectedProjet");
   useEffect(() => {
     const fetchTaches = async () => {
       try {
-        const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`);
+        const response = await fetch(`http://localhost:8081/api/tasks/user/${userId}`);
         
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -32,31 +32,12 @@ export default function TaskList() {
       }
     };
   
-    if (projetId) {
+    if (userId) {
       fetchTaches();
     }
-  }, [projetId]); // Ajoute projetId comme dépendance
+  }, [userId]); // Ajoute projetId comme dépendance
   
-  const [utilisateurs, setUtilisateurs] = useState([]);
 
-  useEffect(() => {
-    const fetchUtilisateurs = async () => {
-      try {
-        const response = await fetch("http://localhost:8081/utilisateurs");
-
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setUtilisateurs(data); // Stocker la liste des utilisateurs
-      } catch (error) {
-        console.error("Erreur lors du chargement des utilisateurs :", error);
-      }
-    };
-
-    fetchUtilisateurs();
-  }, []);
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination || source.droppableId === destination.droppableId) return;
@@ -278,7 +259,7 @@ const handleSubmit2 = async (e) => {
   };
   
   
-  const userId = localStorage.getItem("id_utilisateur");
+
   if (!userId) {
     return null;
   }
@@ -287,10 +268,10 @@ const handleSubmit2 = async (e) => {
     <div className="task-list-container">
       {/* Conteneur du titre et du bouton sur la même ligne */}
       <div className="vc">
-        <h3>Liste de Taches</h3>
-        <button onClick={handleOpenModal} className="add-task-btn">
+        <h3>Mes Taches</h3>
+        {/* <button onClick={handleOpenModal} className="add-task-btn">
           Ajouter une tâche
-        </button>
+        </button> */}
       </div>
         {/* Ajouter Tache */}
       {isModalOpen && (
@@ -334,20 +315,18 @@ const handleSubmit2 = async (e) => {
                 </select>
               </div>
               <div>
-      <label>Assigné</label>
-      <select
-        name="utilisateur"
-        value={task.utilisateur ? task.utilisateur.id : ""}
-        onChange={handleInputChange}
-      >
-        <option value="">Sélectionner un utilisateur</option>
-        {utilisateurs.map((utilisateur) => (
-          <option key={utilisateur.id} value={utilisateur.id}>
-            {utilisateur.nom} {/* Adaptez selon les champs de votre API */}
-          </option>
-        ))}
-      </select>
-    </div>
+                <label> Assigné </label>
+                <select
+                  name="utilisateur"
+                  value={task.utilisateur ? task.utilisateur.id : ""}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
+                  <option value="1">user 1</option>
+                  <option value="2">user 2</option>
+                  <option value="3">user 3</option>
+                </select>
+              </div>
 
               <div className="modal-actions">
                 <button type="submit">Enregistrer</button>
@@ -401,18 +380,16 @@ const handleSubmit2 = async (e) => {
                 </select>
               </div>
               <div>
-                <label>Assigné</label>
+                <label> Assigné </label>
                 <select
-                  name="utilisateur"
-                  value={task.utilisateur ? task.utilisateur.id : ""}
-                  onChange={handleInputChange}
+                  name="utilisateur2"
+                  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
+                  onChange={handleInputChange2}
                 >
-                  <option value="">Sélectionner un utilisateur</option>
-                  {utilisateurs.map((utilisateur) => (
-                    <option key={utilisateur.id} value={utilisateur.id}>
-                      {utilisateur.nom} {/* Adaptez selon les champs de votre API */}
-                    </option>
-                  ))}
+                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
+                  <option value="1">user 1</option>
+                  <option value="2">user 2</option>
+                  <option value="3">user 3</option>
                 </select>
               </div>
 

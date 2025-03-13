@@ -82,3 +82,8 @@
 .send-button:hover {
   background-color: #0056b3;
 }
+.task-list-container {
+  padding: 50px 20px;
+  max-width: 1700px;
+  margin: 0 auto;
+}

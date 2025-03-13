@@ -1,46 +1,26 @@
-import React, { useState } from "react";
-import './ChatTemplate.css';
+import React, { useState, useEffect } from 'react';
+import Chat from './Chat'; // Importez votre composant Chat
 
 const ChatTemplate = () => {
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
+    const projectId = 1; // Remplacez par l'ID du projet dynamique si nécessaire
+    const [userId, setUserId] = useState(null); // Initialisez userId à null
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, { sender: "User", text: message }]);
-      setMessage("");
-    }
-  };
+    useEffect(() => {
+        // Récupérer l'ID de l'utilisateur depuis localStorage
+        const storedUserId = localStorage.getItem("id_utilisateur");
+        if (storedUserId) {
+            setUserId(parseInt(storedUserId)); // Convertir en nombre si nécessaire
+        }
+    }, []); // Le tableau vide signifie que cet effet ne s'exécute qu'une seule fois au montage du composant
 
-  const handleChange = (event) => {
-    setMessage(event.target.value);
-  };
-
-  return (
-    <div className="chat-container">
-      <div className="chat-header">
-        <h3>Chat</h3>
-      </div>
-      <div className="chat-box">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender === "User" ? "user-message" : "bot-message"}`}>
-            <span>{msg.sender}: </span>
-            <span>{msg.text}</span>
-          </div>
-        ))}
-      </div>
-      <div className="chat-input-container">
-        <input
-          type="text"
-          value={message}
-          onChange={handleChange}
-          className="chat-input"
-          placeholder="Tapez un message..."
-        />
-        <button onClick={handleSendMessage} className="send-button">Envoyer</button>
-      </div>
-    </div>
-  );
+    return (
+        <div className="chat-template">
+            <h2>Chat en temps réel</h2>
+            <div className="chat-container">
+                {userId && <Chat userId={userId} />} {/* Rendre Chat uniquement si userId est disponible */}
+            </div>
+        </div>
+    );
 };
 
 export default ChatTemplate;

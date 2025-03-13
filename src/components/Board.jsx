@@ -116,12 +116,15 @@ const TaskBoard = () => {
             setTodo(removeItemById(task.id, todo));
         }
     };
-
+  const userId = localStorage.getItem("id_utilisateur");
+  if (!userId) {
+    return null;
+  }
     return (
         <div className="tasks-list-container">
         <DragDropContext onDragEnd={handleDragEnd}>
             <h2 style={{ textAlign: "center" }}>Tableau de tâches</h2>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "90%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <Column title={"À Faire"} tasks={todo} id={"1"} style={{ flexGrow: 1 ,}} />
                 <Column title={"En Cours"} tasks={inProgress} id={"2"} style={{ flexGrow: 1 }} />
                 <Column title={"Terminées"} tasks={done} id={"3"} style={{ flexGrow: 1 }} />
