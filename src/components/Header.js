@@ -8,7 +8,7 @@ import "./Nav.css";
 const Header = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem("id_utilisateur"); // Vérifie si l'utilisateur est connecté
-
+  const role = localStorage.getItem("role_utilisateur");
   // Fonction de déconnexion
   const handleLogout = () => {
     // Supprimer l'ID utilisateur du localStorage
@@ -16,6 +16,16 @@ const Header = () => {
    
     // Rediriger vers la page de connexion
     navigate("/");
+  
+    // Rafraîchir la page pour que tout soit réinitialisé (comme un refresh)
+  
+  };
+  const handUser = () => {
+    // Supprimer l'ID utilisateur du localStorage
+   
+   
+    // Rediriger vers la page de connexion
+    navigate("/user");
   
     // Rafraîchir la page pour que tout soit réinitialisé (comme un refresh)
   
@@ -39,7 +49,11 @@ const Header = () => {
 
         {/* Boutons de navigation */}
 
-        <button className="header-btn mm" >Gérer les utilisateurs</button>
+        {role === "Chef de projet" && (
+        <button className="header-btn mm" onClick={handUser}>
+          Gérer les utilisateurs
+        </button>
+      )}
         {/* Bouton de déconnexion */}
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={22} /> Déconnexion
@@ -54,6 +68,7 @@ const Header = () => {
       </div>
       <ul>
         <li><a href="/projet"><Home size={20} /> <span>Home</span></a></li>
+        {role === "Utilisateur Normal" && (   <li><a href="/MesTaches"><BarChart size={20} /> <span>Mes Taches</span></a></li>)}
         <li><a href="/dashboard"><BarChart size={20} /> <span>Dashboard</span></a></li>
         <li><a href="/list"><Inbox size={20} /> <span>Liste</span></a></li>
         <li><a href="/board"><Grid size={20} /> <span>Board</span></a></li>

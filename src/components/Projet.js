@@ -16,7 +16,11 @@ const Projet = () => {
     description: "",
     responsable : {
         id: ""
-    }
+    },
+    priority: "",
+    commencer: "",
+    fin: ""
+
   });
 
   useEffect(() => {
@@ -84,7 +88,7 @@ const Projet = () => {
       .then((data) => {
         setProjets([...projets, data]);
         setShowModal(false);
-        setNewProjet({ name: "", description: "" });
+        setNewProjet({ name: "", description: "",    priority: "", commencer: "",     fin: ""});
       })
       .catch((error) => console.error("Erreur lors de l'ajout du projet :", error));
   };
@@ -200,6 +204,38 @@ const Projet = () => {
               placeholder="Description"
               value={newProjet.description}
               onChange={(e) => setNewProjet({ ...newProjet, description: e.target.value })}
+            />
+{/* 
+                        <input
+              type="text"
+              placeholder="priority"
+              value={newProjet.priority}
+              onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
+            /> */}
+                        <div>
+           
+                <select
+                  name="priority"
+                  value={newProjet.priority}
+                  onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
+                >
+                  <option value="">Sélectionner une priorité</option>
+                  <option value="Faible">Faible</option>
+                  <option value="Moyen">Moyen</option>
+                  <option value="HAUT">HAUT</option>
+                </select>
+              </div>
+                        <input
+              type="date"
+              placeholder="commencer"
+              value={newProjet.commencer}
+              onChange={(e) => setNewProjet({ ...newProjet, commencer: e.target.value })}
+            />
+                                    <input
+              type="date"
+              placeholder="fin"
+              value={newProjet.fin}
+              onChange={(e) => setNewProjet({ ...newProjet, fin: e.target.value })}
             />
             <div className="modal-buttons">
               <button onClick={handleAddProject}>Ajouter</button>

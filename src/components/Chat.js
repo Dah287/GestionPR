@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import axios from 'axios';
-
+import { Avatar } from "antd";
+import "./ChatTemplate.css";
 const Chat = ({ userId }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -10,7 +11,7 @@ const Chat = ({ userId }) => {
     const [users, setUsers] = useState([]); // Liste des utilisateurs
     const [stompClient, setStompClient] = useState(null);
     const messageContainerRef = useRef(null);
-
+    const [notifications, setNotifications] = useState({});
     // Récupérer la liste des utilisateurs
     useEffect(() => {
         axios.get('http://localhost:8081/utilisateurs')
@@ -27,11 +28,7 @@ const Chat = ({ userId }) => {
             console.log('Connecté au WebSocket');
             setStompClient(client);
 
-            // S'abonner aux messages privés
-            client.subscribe(`/user/${userId}/queue/messages`, (message) => {
-                const receivedMessage = JSON.parse(message.body);
-                setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-            });
+
         }, (error) => {
             console.error('Erreur de connexion WebSocket:', error);
         });
@@ -45,19 +42,6 @@ const Chat = ({ userId }) => {
         };
     }, [userId]);
 
-    // Envoyer un message
-    // const sendMessage = () => {
-    //     if (stompClient && newMessage.trim() && recipientId) {
-    //         const chatMessage = {
-    //             content: newMessage,
-    //             senderId: userId,
-    //             recipientId: recipientId,
-    //         };
-    //         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-    //       //  setMessages((prevMessages) => [...prevMessages, chatMessage]); // Mise à jour immédiate
-    //         setNewMessage('');
-    //     }
-    // };
 
     const sendMessage = () => {
         if (stompClient && newMessage.trim() && recipientId) {
@@ -81,7 +65,7 @@ const Chat = ({ userId }) => {
     // Récupérer l'historique des messages
     useEffect(() => {
         if (recipientId) {
-            axios.get(`http://localhost:8081/api/chat/messages?senderId=${userId}&recipientId=${recipientId}`)
+            axios.get(`http://localhost:8081/api/chat/allMessages`)
                 .then(response => setMessages(response.data))
                 .catch(error => console.error('Erreur lors de la récupération des messages', error));
         } else {
@@ -90,6 +74,8 @@ const Chat = ({ userId }) => {
         console.log("data recipientId:--> ", recipientId);
         console.log("data userId:--> ", userId);
     }, [recipientId, userId]);
+
+    
 
     // Scroll automatique vers le bas
     useEffect(() => {
@@ -106,28 +92,68 @@ const Chat = ({ userId }) => {
     console.log("data recipientId: ", recipientId);
     console.log("data userId: ", userId);
     console.log("data filtre: ", filteredMessages);
+    const sortedUsers = [...users].sort((a, b) => {
+        if (a.id === parseInt(userId)) {
+            return -1; // a vient en premier
+        }
+        if (b.id === parseInt(userId)) {
+            return 1; // b vient en premier
+        }
+        return 0; // Aucun changement d'ordre
+    });
+    
     return (
-        <div style={{ display: 'flex' }}>
+        <div className="task-list-containerr">
             {/* Colonne gauche : Liste des utilisateurs */}
             <div style={{ width: '30%', borderRight: '1px solid #ccc', padding: '10px' }}>
-                <h3>Utilisateurs</h3>
-                <ul>
-                    {users.map(user => (
-                        <li
-                            key={user.id}
-                            onClick={() => setRecipientId(user.id)}
-                            style={{ cursor: 'pointer', padding: '5px', backgroundColor: recipientId === user.id ? '#f0f0f0' : '#fff' }}
-                        >
-                            {user.nom}
-                        </li>
-                    ))}
-                </ul>
+            <h3 >Utilisateurs</h3>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+    {sortedUsers.map(user => (
+        <li
+            key={user.id}
+            onClick={() => setRecipientId(user.id)}
+            style={{
+                cursor: 'pointer',
+                padding: '10px',
+                backgroundColor: recipientId === user.id ? '#e0e0e0' : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: '5px',
+                transition: 'background-color 0.3s',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = recipientId === user.id ? '#e0e0e0' : 'transparent')}
+        >
+            {/* Avatar */}
+            <div style={{ marginRight: '10px' }}>
+                <Avatar
+                    src={user.profileImage || `/icon${user.id}.png`}
+                    alt="Avatar"
+                    onClick={() => console.log(user)}
+                />
             </div>
+
+            {/* Nom de l'utilisateur */}
+            <span style={{ flexGrow: 1 }}>
+                {user.id === parseInt(userId) ? `Moi (${user.nom})` : user.nom}
+            </span>
+
+            {/* Icône de message non lu */}
+            {user.unreadCount > 0 && (
+                <i
+                    className="fas fa-comment-dots"
+                    style={{ color: 'orange', fontSize: '20px' }}
+                ></i>
+            )}
+        </li>
+    ))}
+</ul>
+        </div>
 
             {/* Colonne droite : Zone de discussion */}
             <div style={{ width: '70%', padding: '10px' }}>
                 <h3>Discussion</h3>
-                <div ref={messageContainerRef} style={{ height: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                <div ref={messageContainerRef} style={{ height: '600px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
                     {filteredMessages.map((msg, index) => (
                         <div
                             key={index}
@@ -159,7 +185,7 @@ const Chat = ({ userId }) => {
                     placeholder="Écrire un message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    style={{ width: '80%', padding: '10px', marginRight: '10px' }}
+                    style={{ width: '98%', padding: '10px', marginRight: '10px' }}
                 />
                 <button onClick={sendMessage} style={{ padding: '10px' }}>Envoyer</button>
             </div>

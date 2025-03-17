@@ -15,7 +15,7 @@ const ChatTemplate = () => {
 
     return (
         <div className="chat-template">
-            <h2>Chat en temps réel</h2>
+            <h2 style={{ paddingLeft: "270px" }}>Chat en temps réel</h2>
             <div className="chat-container">
                 {userId && <Chat userId={userId} />} {/* Rendre Chat uniquement si userId est disponible */}
             </div>

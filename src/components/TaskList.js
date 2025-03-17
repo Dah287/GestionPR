@@ -403,9 +403,9 @@ const handleSubmit2 = async (e) => {
               <div>
                 <label>Assigné</label>
                 <select
-                  name="utilisateur"
+                  name="utilisateur2"
                   value={task.utilisateur ? task.utilisateur.id : ""}
-                  onChange={handleInputChange}
+                  onChange={handleInputChange2}
                 >
                   <option value="">Sélectionner un utilisateur</option>
                   {utilisateurs.map((utilisateur) => (
@@ -461,7 +461,7 @@ const handleSubmit2 = async (e) => {
                           className="task-item"
                         >
                           <span className="task-title ">{task.title}</span>
-                          <span className="task-info assigned-style">
+                          <span className="task-info assigned-style"style={{ width: '200px' }}>
                           <FaUser /> Assigné : <strong>{task.utilisateur ? task.utilisateur.nom : "Non assigné"}</strong>
                           </span>
                           <span className="task-info due-date-style">

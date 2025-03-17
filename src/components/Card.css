@@ -35,3 +35,9 @@
 .avatar {
     cursor: pointer;
 }
+.text-content {
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+    overflow: hidden; /* Cache le texte qui dépasse */
+    text-overflow: ellipsis; /* Affiche des points de suspension */
+    max-width: 200px; /* Définissez une largeur maximale pour le conteneur */
+}

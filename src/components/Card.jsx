@@ -48,6 +48,19 @@ export default function Card({ task, index }) {
         // Ajoutez ici votre logique pour mettre à jour le statut de la tâche
     };
 
+    const TextContent = ({ children }) => (
+        <div
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: '500px',
+          }}
+        >
+          {children}
+        </div>
+      );
+
     return (
         <Draggable draggableId={`${task.id}`} key={task.id} index={index}>
             {(provided, snapshot) => (
@@ -96,7 +109,7 @@ export default function Card({ task, index }) {
                         {/* Avatar à droite */}
                         <Avatar
                             onClick={() => console.log(task)}
-                            src={"https://joesch.moe/api/v1/random?key=" + task.id}
+                            src={`/icon${task.utilisateur.id}.png`}
                         />
                     </Icons>
                     {provided.placeholder}

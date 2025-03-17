@@ -12,6 +12,7 @@ import ChatTemplate from './components/ChatTemplate';
 import Login from './components/Login';
 import MesTaches from './components/User/MesTaches';
 import ChatTemplatee from './components/ChatTemplatee';
+import Utilisateur from './components/Utilisateur';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
                 <Route  path="/chat" element={<ChatTemplate />} />
                 <Route  path="/MesTaches" element={<MesTaches />} />
                 <Route  path="/msg" element={<ChatTemplatee />} />
+                <Route  path="/user" element={<Utilisateur />} />
                 {/* Autres routes si nécessaire */}
               </Routes>
             </div>

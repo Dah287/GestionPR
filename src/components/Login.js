@@ -22,7 +22,12 @@ const Login = () => {
       if (response.data) {
         console.log("Data :", response.data);
         localStorage.setItem("id_utilisateur", response.data.id);
-        navigate("/projet");
+        localStorage.setItem("role_utilisateur", response.data.role); // Stocker le rôle
+        if (response.data.role === "Chef de projet") {
+            navigate("/projet"); // Rediriger vers /projet si le rôle est Chef de projet
+          } else {
+            navigate("/MesTaches"); // Rediriger vers /MesTaches sinon
+          }
       }
     } catch (error) {
       setError("Identifiants incorrects !"); // Affiche le message d'erreur en cas d'échec
