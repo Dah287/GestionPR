@@ -49,4 +49,14 @@ public class TaskService {
         Tache task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
         taskRepository.delete(task);
     }
+
+    public List<Tache> getTachesByUserId(Long userId) {
+        return taskRepository.findByUtilisateurId(userId);
+    }
+
+    public Tache updateTacheStatus(Long id,Tache taskDetails) {
+        Tache task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        task.setStatus(taskDetails.getStatus());
+        return taskRepository.save(task);
+    }
 }

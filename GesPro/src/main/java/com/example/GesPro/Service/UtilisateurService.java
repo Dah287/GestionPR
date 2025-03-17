@@ -40,7 +40,7 @@ public class UtilisateurService {
 
     // Méthode pour vérifier l'authentification de l'utilisateur
     public Utilisateur login(String email, String nom) {
-        Optional<Utilisateur> utilisateur = utilisateurRepository.findByNomAndPassword(email, nom);
+        Optional<Utilisateur> utilisateur = utilisateurRepository.findByEmailAndPassword(email, nom);
         return utilisateur.orElse(null); // Renvoie l'utilisateur trouvé ou null
     }
 

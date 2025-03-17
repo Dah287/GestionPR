@@ -15,6 +15,9 @@ public class Projet {
 
     private String name;
     private String description;
+    private String commencer;
+    private String fin;
+    private String priority;
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
@@ -64,5 +67,28 @@ public class Projet {
 
     public void setTaches(List<Tache> taches) {
         this.taches = taches;
+    }
+    public String getCommencer() {
+        return commencer;
+    }
+
+    public void setCommencer(String Commencer) {
+        commencer = Commencer;
+    }
+
+    public String getFin() {
+        return fin;
+    }
+
+    public void setFin(String Fin) {
+        fin = Fin;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        priority = priority;
     }
 }

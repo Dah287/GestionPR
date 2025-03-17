@@ -14,12 +14,19 @@ public class Utilisateur {
     private Long id;
 
     private String nom;
+    private String nomm;
     private String email;
     private String password;
     private String role;
     @JsonIgnore
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Tache> taches;
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    private List<ChatMessageEntity> messagesEnvoyes;
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL)
+    private List<ChatMessageEntity> messagesRecus;
 
     // Getters and Setters
     // Getters
@@ -69,5 +76,20 @@ public class Utilisateur {
 
     public void setTaches(List<Tache> taches) {
         this.taches = taches;
+    }
+    public List<ChatMessageEntity> getMessagesEnvoyes() {
+        return messagesEnvoyes;
+    }
+
+    public void setMessagesEnvoyes(List<ChatMessageEntity> messagesEnvoyes) {
+        this.messagesEnvoyes = messagesEnvoyes;
+    }
+
+    public List<ChatMessageEntity> getMessagesRecus() {
+        return messagesRecus;
+    }
+
+    public void setMessagesRecus(List<ChatMessageEntity> messagesRecus) {
+        this.messagesRecus = messagesRecus;
     }
 }

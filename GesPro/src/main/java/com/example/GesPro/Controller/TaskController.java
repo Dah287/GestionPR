@@ -57,4 +57,15 @@ public class TaskController {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/user/{userId}")
+    public List<Tache> getTachesByUser(@PathVariable Long userId) {
+        return taskService.getTachesByUserId(userId);
+    }
+
+    @PutMapping("/{id}/update-status")
+    public ResponseEntity<Tache> updateTacheStatus(@PathVariable Long id, @RequestBody Tache taskDetails) {
+        Tache updatedTask = taskService.updateTask(id, taskDetails);
+        return ResponseEntity.ok(updatedTask);
+    }
+
 }
