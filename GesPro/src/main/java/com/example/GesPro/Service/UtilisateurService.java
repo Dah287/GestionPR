@@ -44,4 +44,16 @@ public class UtilisateurService {
         return utilisateur.orElse(null); // Renvoie l'utilisateur trouvé ou null
     }
 
+    public Utilisateur updateUser(Long id, Utilisateur updatedUser) {
+        Utilisateur existingUser = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        existingUser.setNom(updatedUser.getNom());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPassword(updatedUser.getPassword());
+        existingUser.setRole(updatedUser.getRole());
+
+        return utilisateurRepository.save(existingUser);
+    }
+
 }

@@ -56,5 +56,9 @@ public class UtilisateurController {
 
         return ResponseEntity.status(401).body(null); // Unauthorized si les identifiants sont incorrects
     }
-
+    @PutMapping("/{id}")
+    public ResponseEntity<Utilisateur> updateUser(@PathVariable Long id, @RequestBody Utilisateur updatedUser) {
+        Utilisateur user = utilisateurService.updateUser(id, updatedUser);
+        return ResponseEntity.ok(user);
+    }
 }

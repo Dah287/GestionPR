@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GesPro.iml" filepath="$PROJECT_DIR$/.idea/GesPro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GesPro/GesPro.iml" filepath="$PROJECT_DIR$/GesPro/GesPro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/GestionPR.iml" filepath="$PROJECT_DIR$/.idea/GestionPR.iml" />
     </modules>
   </component>
 </project>
