@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [tasksDue, setTasksDue] = useState({ dueThisWeek: 0, overdue: 0 });
 
   useEffect(() => {
-    fetch("http://localhost:8081/projets")
+    fetch("http://192.168.1.81:8081/projets")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -32,7 +32,7 @@ const Dashboard = () => {
         }
 
         const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://localhost:8081/projets/${projet.id}/taches`)
+          fetch(`http://192.168.1.81:8081/projets/${projet.id}/taches`)
             .then((response) => {
               if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
@@ -84,7 +84,7 @@ const Dashboard = () => {
   return (
     <div className='tasks-list-container'>
     <div className="dashboard-container">
-      <h2 className="dashboard-title">Dashboard</h2>
+      <h2 className="dashboard-title">Tableau de bord</h2>
       <div className="charts-container">
         <div className="chart-box">
           <h3>Tâches par statut</h3>
@@ -100,7 +100,7 @@ const Dashboard = () => {
           }} />
         </div>
         <div className="chart-box">
-          <h3>Total Tasks by Assignee</h3>
+          <h3>Tâches par assigné</h3>
           <Bar data={{
             labels: Object.keys(tasksByAssignee),
             datasets: [{
@@ -113,13 +113,12 @@ const Dashboard = () => {
           }} />
         </div>
         <div className="chart-box tasks-due">
-        <h3>Tâches à échéance cette semaine ou en retard</h3>
-        <div className="tasks-due-details">
+          <h3>Tâches à échéance cette semaine ou en retard</h3>
+          <div className="tasks-due-details">
             <p>📅 À échéance cette semaine : <span>{tasksDue.dueThisWeek}</span></p>
             <p>⚠️ En retard : <span>{tasksDue.overdue}</span></p>
+          </div>
         </div>
-        </div>
-
       </div>
     </div>
     </div>

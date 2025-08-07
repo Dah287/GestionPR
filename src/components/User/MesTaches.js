@@ -15,7 +15,7 @@ export default function MesTaches() {
   useEffect(() => {
     const fetchTaches = async () => {
       try {
-        const response = await fetch(`http://localhost:8081/api/tasks/user/${userId}`);
+        const response = await fetch(`http://192.168.1.81:8081/api/tasks/user/${userId}`);
         
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -84,7 +84,7 @@ export default function MesTaches() {
 
   function updateTaskInDatabase(task) {
     console.log("Updating task in DB:", task);
-    fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+    fetch(`http://192.168.1.81:8081/api/tasks/${task.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
@@ -153,7 +153,7 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://localhost:8081/api/tasks/tache/${selectedTask.id}`, {
+    const response = await fetch(`http://192.168.1.81:8081/api/tasks/tache/${selectedTask.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(selectedTask),
@@ -218,7 +218,7 @@ const handleSubmit2 = async (e) => {
     console.log("new task :", newTask);
   
     try {
-      const response = await fetch(`http://localhost:8081/api/tasks`, {
+      const response = await fetch(`http://192.168.1.81:8081/api/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -447,6 +447,9 @@ const handleSubmit2 = async (e) => {
                           <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
                             <FaFlag /> Priorité : <strong>{task.priority}</strong>
                           </span>
+                          <span  style={{ color: "#6c757d" }}>
+                            <FaFlag /> Projet : <strong>{task.projet.name}</strong>
+                          </span>
                         </li>
         )}
       </Draggable>
@@ -501,6 +504,9 @@ const handleSubmit2 = async (e) => {
                           <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
                             <FaFlag /> Priorité : <strong>{task.priority}</strong>
                           </span>
+                          <span  style={{ color: "#6c757d" }}>
+                            <FaFlag /> Projet : <strong>{task.projet.name}</strong>
+                          </span>
                         </li>
                         )}
                       </Draggable>
@@ -554,6 +560,12 @@ const handleSubmit2 = async (e) => {
                           <span className={`task-info priority-${task.priority?.toLowerCase()} priority-style`}>
                             <FaFlag /> Priorité : <strong>{task.priority}</strong>
                           </span>
+                          
+                          <span  style={{ color: "#6c757d" }}>
+                            <FaFlag /> Projet : <strong>{task.projet.name}</strong>
+                          </span>
+                          
+
                         </li>
 
                         )}

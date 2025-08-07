@@ -62,3 +62,60 @@
 .nav ul li a span {
     font-weight: 500;
 }
+/* Media query pour les écrans inférieurs à 1600px */
+@media only screen and (max-width: 1600px) {
+    /* Modifier la largeur de la barre de navigation */
+    .nav {
+        width: 110px; /* Réduire la largeur */
+    }
+
+    /* Réduire la taille du logo */
+    .logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    /* Ajuster la taille des liens dans la barre de navigation */
+    .nav ul li a {
+        padding: 10px; /* Réduire le padding */
+        font-size: 14px; /* Réduire la taille du texte */
+    }
+
+    /* Réduire la taille des icônes */
+    .nav ul li a svg {
+        margin-right: 10px; /* Réduire l'espacement à droite des icônes */
+    }
+
+    /* Espacement entre les éléments de la liste */
+    .nav ul li {
+        margin-bottom: 8px; /* Réduire l'espacement entre les éléments */
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    /* Réduire davantage la taille de la barre de navigation */
+    .nav {
+        width: 100px; /* Réduire la largeur encore plus pour les très petits écrans */
+    }
+
+    /* Réduire encore la taille du logo */
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Réduire encore la taille du texte et des icônes */
+    .nav ul li a {
+        padding: 8px; /* Réduire le padding */
+        font-size: 12px; /* Réduire la taille du texte */
+    }
+
+    .nav ul li a svg {
+        margin-right: 8px; /* Réduire l'espacement des icônes */
+    }
+
+    /* Espacement des éléments */
+    .nav ul li {
+        margin-bottom: 6px; /* Espacement plus petit */
+    }
+}

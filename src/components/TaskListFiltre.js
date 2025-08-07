@@ -4,41 +4,109 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import "./TaskList.css";
-export default function TaskList() {
+export default function TaskListFiltre() {
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
-  
   //const { id } = useParams();
 
+  const [utilisateurs, setUtilisateurs] = useState([]);
+  const [projets, setProjets] = useState([]);  
 
-  const projetId = localStorage.getItem("selectedProjet");
+ // const projetId = localStorage.getItem("selectedProjet");
+
+ const idUtilisateur = localStorage.getItem("id_utilisateur");
+  const [selectedProjet, setSelectedProjet] = useState();
+
+  // Charger la liste des projets
+  useEffect(() => {
+    const fetchProjets = async () => {
+      try {
+        const response = await fetch(`http://192.168.1.81:8081/projets/responsable/${idUtilisateur}`);
+        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        const data = await response.json();
+        setProjets(data);
+        console.log("Données reçues:", data); // Ici data est correct
+      } catch (error) {
+        console.error("Erreur:", error);
+      }
+    };
+    fetchProjets();
+  }, []);
+
+
+  // Ajoutez un useEffect séparé pour surveiller les changements de 'projets'
+useEffect(() => {
+    console.log("État projets mis à jour:", projets); // Maintenant vous verrez les données
+  }, [projets]); // Déclenché chaque fois que 'projets' change
+  // Charger les utilisateurs
+  useEffect(() => {
+    const fetchUtilisateurs = async () => {
+      try {
+        const response = await fetch("http://192.168.1.81:8081/utilisateurs");
+        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        const data = await response.json();
+        setUtilisateurs(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des utilisateurs:", error);
+      }
+    };
+    fetchUtilisateurs();
+  }, []);
+
+  // Charger les tâches quand le projet sélectionné change
   useEffect(() => {
     const fetchTaches = async () => {
+      if (!selectedProjet) return;
+      
       try {
-        const response = await fetch(`http://192.168.1.81:8081/projets/${projetId}/taches`);
+        console.log("Fetching tasks for project:", selectedProjet);
+        
+        const response = await fetch(`http://192.168.1.81:8081/projets/${selectedProjet}/taches`);
+        
+        // Debug: Vérifiez la réponse complète
+        console.log("Full response:", {
+          status: response.status,
+          ok: response.ok,
+          headers: [...response.headers.entries()],
+        });
         
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`Erreur HTTP ${response.status}: ${errorText}`);
         }
   
-        const json = await response.json();
-        console.log("Données reçues :", json);
-  
+        // Deux méthodes pour gérer les réponses vides
+        const responseText = await response.text();
+        const json = responseText ? JSON.parse(responseText) : [];
+        
+        console.log("Tasks data:", json);
+        
+        // Mise à jour des états
         setTodo(json.filter((task) => task.status === "TODO"));
         setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
         setDone(json.filter((task) => task.status === "DONE"));
+        
+        // Sauvegarde dans localStorage
+        localStorage.setItem("selectedProjet", selectedProjet);
       } catch (error) {
-        console.error("Erreur lors du chargement des tâches :", error);
+        console.error("Erreur complète:", error);
+        // Réinitialiser les tâches en cas d'erreur
+        setTodo([]);
+        setInProgress([]);
+        setDone([]);
       }
     };
   
-    if (projetId) {
-      fetchTaches();
-    }
-  }, [projetId]); // Ajoute projetId comme dépendance
-  
-  const [utilisateurs, setUtilisateurs] = useState([]);
+    fetchTaches();
+  }, [selectedProjet]); // Déclenché seulement quand selectedProjet change
+  const handleProjetChange = (e) => {
+    setSelectedProjet(e.target.value);
+    console.log("id selectionne ",selectedProjet)
+  };
+
+
+
 
   useEffect(() => {
     const fetchUtilisateurs = async () => {
@@ -288,7 +356,34 @@ const handleSubmit2 = async (e) => {
     <div className="task-list-container">
       {/* Conteneur du titre et du bouton sur la même ligne */}
       <div className="vc">
-        <h3>Liste des Taches pour le projet selectionne</h3>
+        <h3>Liste de Taches</h3>
+        <div className="projet-selector-container">
+  <label htmlFor="projet-select" className="projet-selector-label">
+    Sélectionnez un projet
+  </label>
+  <div className="projet-selector-wrapper">
+    <select
+      id="projet-select"
+      value={selectedProjet}
+      onChange={handleProjetChange}
+      className="projet-selector"
+    >
+      <option value="" disabled hidden>
+        Choisir un projet...
+      </option>
+      {projets.map((projet) => (
+        <option key={projet.id} value={projet.id} className="projet-option">
+          📁 {projet.name}
+        </option>
+      ))}
+    </select>
+    <div className="projet-selector-arrow">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+        <path d="M1 1L6 6L11 1" stroke="#4A5568" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    </div>
+  </div>
+</div>
         <button onClick={handleOpenModal} className="add-task-btn">
           Ajouter une tâche
         </button>
@@ -606,3 +701,4 @@ const handleSubmit2 = async (e) => {
   );
   
 }
+

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./Projet.css";
 import { useNavigate } from "react-router-dom";
-import { FaTrash,FaPlus  } from "react-icons/fa";
 
+import { FaTrash, FaPlus, FaChevronRight } from "react-icons/fa";
 const Projet = () => {
   const [projets, setProjets] = useState([]);
   const [selectedProjet, setSelectedProjet] = useState(
@@ -29,7 +29,7 @@ const Projet = () => {
     //     console.error("Aucun utilisateur connecté !");
     //     return;
     //   }
-    fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`)
+    fetch(`http://192.168.1.81:8081/projets/responsable/${idUtilisateur}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
@@ -49,7 +49,7 @@ const Projet = () => {
         }
 
         const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://localhost:8081/projets/${projet.id}/taches`)
+          fetch(`http://192.168.1.81:8081/projets/${projet.id}/taches`)
             .then((response) => {
               if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
@@ -79,7 +79,7 @@ const Projet = () => {
   };
 
   const handleAddProject = () => {
-    fetch("http://localhost:8081/projets", {
+    fetch("http://192.168.1.81:8081/projets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newProjet1),
@@ -95,7 +95,7 @@ const Projet = () => {
 
   const handleDeleteProject = (projetId) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
-      fetch(`http://localhost:8081/projets/${projetId}`, {
+      fetch(`http://192.168.1.81:8081/projets/${projetId}`, {
         method: "DELETE",
       })
         .then((response) => {
@@ -133,113 +133,166 @@ const Projet = () => {
     return null;
   }
 
-  return (
-    <div className="tasks-list-container">
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h3>Liste des projets</h3>
-        <button className="add-task-btn" onClick={() => setShowModal(true)}>
-            <FaPlus className="icon" /> Ajouter projet
-        </button>
 
+  return (
+    <div className="projects-dashboard">
+      {/* Header */}
+      <div className="projects-header">
+        <h2 className="projects-title">Liste Des Projets</h2>
+        <button className="add-project-btn" onClick={() => setShowModal(true)}>
+          <FaPlus className="icon" /> Nouveau Projet
+        </button>
       </div>
-      <div className="project-list">
+
+      {/* Projects Grid */}
+      <div className="projects-grid">
         {projets.map((projet) => (
-          <div
-            key={projet.id}
+          <div 
+            key={projet.id} 
             className={`project-card ${selectedProjet === projet.id ? "selected" : ""}`}
             onClick={() => handleProjetClick(projet.id)}
-            style={{ position: "relative" }}
           >
-            <h4 className="project-title">🚀 Projet N°{projet.id} - {projet.name}</h4>
+            <div className="project-card-header">
+              <h3 className="project-name">
+                <span className="project-icon">📋</span>
+                {projet.name}
+              </h3>
+              <button 
+                className="delete-project-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteProject(projet.id);
+                }}
+              >
+                <FaTrash />
+              </button>
+            </div>
 
-            {/* Icône de suppression en haut à droite */}
-            <FaTrash
-              className="project-delete-icon"
-              onClick={(e) => {
-                e.stopPropagation(); // Empêche le clic de propager au projet
-                handleDeleteProject(projet.id);
-              }}
-              style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px",
-                cursor: "pointer",
-                fontSize: "20px",
-                color: "red",
-              }}
-            />
+            <p className="project-description">{projet.description || "Aucune description"}</p>
 
-            <div className="task-progress">
-              {["TODO", "IN_PROGRESS", "DONE"].map((status) => (
-                <div key={status} className="task-progress-item">
-                  <span className="status-label">{status.replace("_", " ")} :</span>
-                  <span className="status-percentage">
-                    {calculateStatusPercentage(projet.taches, status)}%
-                  </span>
-                  <div className="progress-bar-container">
-                    <div
-                      className={`progress-bar ${status.toLowerCase()}`}
-                      style={{ width: `${calculateStatusPercentage(projet.taches, status)}%` }}
-                    ></div>
-                  </div>
+            {/* Progress Bars */}
+            <div className="progress-container">
+              <div className="progress-item">
+                <span className="progress-label">À faire</span>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill todo" 
+                    style={{ width: `${calculateStatusPercentage(projet.taches, "TODO")}%` }}
+                  ></div>
                 </div>
-              ))}
+                <span className="progress-percentage">
+                  {calculateStatusPercentage(projet.taches, "TODO")}%
+                </span>
+              </div>
+
+              <div className="progress-item">
+                <span className="progress-label">En cours</span>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill in-progress" 
+                    style={{ width: `${calculateStatusPercentage(projet.taches, "IN_PROGRESS")}%` }}
+                  ></div>
+                </div>
+                <span className="progress-percentage">
+                  {calculateStatusPercentage(projet.taches, "IN_PROGRESS")}%
+                </span>
+              </div>
+
+              <div className="progress-item">
+                <span className="progress-label">Terminé</span>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill done" 
+                    style={{ width: `${calculateStatusPercentage(projet.taches, "DONE")}%` }}
+                  ></div>
+                </div>
+                <span className="progress-percentage">
+                  {calculateStatusPercentage(projet.taches, "DONE")}%
+                </span>
+              </div>
+            </div>
+
+            <div className="project-footer">
+              <span className="project-dates">
+                {new Date(projet.commencer).toLocaleDateString()} - {new Date(projet.fin).toLocaleDateString()}
+              </span>
+              <span className={`project-priority ${projet.priority?.toLowerCase()}`}>
+                {projet.priority}
+              </span>
+            </div>
+
+            <div className="view-project">
+              Voir les tâches <FaChevronRight className="arrow-icon" />
             </div>
           </div>
         ))}
       </div>
 
+      {/* Add Project Modal */}
       {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Ajouter un projet</h3>
-            <input
-              type="text"
-              placeholder="Nom du projet"
-              value={newProjet.name}
-              onChange={(e) => setNewProjet({ ...newProjet, name: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={newProjet.description}
-              onChange={(e) => setNewProjet({ ...newProjet, description: e.target.value })}
-            />
-{/* 
-                        <input
-              type="text"
-              placeholder="priority"
-              value={newProjet.priority}
-              onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
-            /> */}
-                        <div>
-           
-                <select
-                  name="priority"
-                  value={newProjet.priority}
-                  onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
-                >
-                  <option value="">Sélectionner une priorité</option>
-                  <option value="Faible">Faible</option>
-                  <option value="Moyen">Moyen</option>
-                  <option value="HAUT">HAUT</option>
-                </select>
+        <div className="modal-overlay">
+          <div className="project-modal">
+            <h3>Créer un nouveau projet</h3>
+            <div className="form-group">
+              <label>Nom du projet</label>
+              <input
+                type="text"
+                value={newProjet.name}
+                onChange={(e) => setNewProjet({ ...newProjet, name: e.target.value })}
+                placeholder="Nommez votre projet"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Description</label>
+              <textarea
+                value={newProjet.description}
+                onChange={(e) => setNewProjet({ ...newProjet, description: e.target.value })}
+                placeholder="Décrivez votre projet"
+                rows="3"
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Date de début</label>
+                <input
+                  type="date"
+                  value={newProjet.commencer}
+                  onChange={(e) => setNewProjet({ ...newProjet, commencer: e.target.value })}
+                />
               </div>
-                        <input
-              type="date"
-              placeholder="commencer"
-              value={newProjet.commencer}
-              onChange={(e) => setNewProjet({ ...newProjet, commencer: e.target.value })}
-            />
-                                    <input
-              type="date"
-              placeholder="fin"
-              value={newProjet.fin}
-              onChange={(e) => setNewProjet({ ...newProjet, fin: e.target.value })}
-            />
-            <div className="modal-buttons">
-              <button onClick={handleAddProject}>Ajouter</button>
-              <button onClick={() => setShowModal(false)}>Annuler</button>
+
+              <div className="form-group">
+                <label>Date de fin</label>
+                <input
+                  type="date"
+                  value={newProjet.fin}
+                  onChange={(e) => setNewProjet({ ...newProjet, fin: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Priorité</label>
+              <select
+                value={newProjet.priority}
+                onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
+              >
+                <option value="">Sélectionnez une priorité</option>
+                <option value="Faible">Faible</option>
+                <option value="Moyen">Moyen</option>
+                <option value="HAUT">Haute</option>
+              </select>
+            </div>
+
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowModal(false)}>
+                Annuler
+              </button>
+              <button className="submit-btn" onClick={handleAddProject}>
+                Créer le projet
+              </button>
             </div>
           </div>
         </div>

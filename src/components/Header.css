@@ -92,4 +92,27 @@
   .logout-btn:hover {
     background-color: #c9302c;
   }
-  
+  /* Media query pour les écrans inférieurs à 1600px */
+@media only screen and (max-width: 1600px) {
+    /* Réduire l'espacement dans le conteneur */
+    .header-container {
+        gap: 20px; /* Réduire l'espacement entre les éléments */
+        margin-right: 130px;
+    }
+
+    /* Réduire la largeur de la barre de recherche */
+    .search-bar {
+        width: 500px; /* Réduire la largeur de la recherche */
+        margin-right: 300px; /* Ajuster le placement */
+    }
+
+    /* Réduire la taille de la police et des boutons */
+    .header-btn {
+        font-size: 14px; /* Réduire la taille du texte */
+        padding: 6px 12px; /* Réduire la taille du bouton */
+    }
+
+    .mm {
+        width: 120px;
+    }
+}

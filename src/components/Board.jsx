@@ -11,7 +11,7 @@ const TaskBoard = () => {
     useEffect(() => {
         const fetchTaches = async () => {
           try {
-            const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`);
+            const response = await fetch(`http://192.168.1.81:8081/projets/${projetId}/taches`);
             
             if (!response.ok) {
               throw new Error(`Erreur HTTP: ${response.status}`);
@@ -80,7 +80,7 @@ const TaskBoard = () => {
 
     function updateTaskInDatabase(task) {
         console.log("Updating task in DB:", task); // Debugger pour voir la tâche envoyée
-        fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+        fetch(`http://192.168.1.81:8081/api/tasks/${task.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(task)

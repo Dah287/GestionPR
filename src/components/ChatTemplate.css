@@ -122,3 +122,56 @@
 .task-list-containerr button:hover {
   background-color: #0056b3;
 }
+@media only screen and (max-width: 1600px) {
+  .task-list-containerr {
+    max-width: 90%;
+    height: auto;
+    font-size: 14px;  /* Réduire la taille du texte */
+  }
+
+  /* Colonne utilisateurs */
+  .task-list-containerr > div:first-child {
+    width: 100%;  /* Passer à 100% pour occuper toute la largeur sur un petit écran */
+    border-right: none;
+    border-bottom: 1px solid #ccc;
+    padding: 10px;  /* Réduire la marge intérieure */
+  }
+
+  .task-list-containerr h3 {
+    font-size: 16px;  /* Réduire la taille du titre */
+  }
+
+  /* Liste des utilisateurs */
+  .task-list-containerr ul {
+    font-size: 14px;  /* Réduire la taille du texte des éléments de liste */
+  }
+
+  /* Messages */
+  .task-list-containerr .message-content {
+    font-size: 14px;  /* Réduire la taille du texte des messages */
+    max-width: 80%;  /* Réduire la largeur des messages pour mieux les afficher */
+  }
+
+  .task-list-containerr .message.sent .message-content {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .task-list-containerr .message.received .message-content {
+    background-color: #f0f0f0;
+    color: black;
+  }
+
+  /* Champ de saisie et bouton */
+  .task-list-containerr .message-input {
+    font-size: 14px;  /* Réduire la taille du texte dans le champ de saisie */
+  }
+
+  .task-list-containerr input {
+    padding: 8px;  /* Réduire la taille du champ de saisie */
+  }
+
+  .task-list-containerr button {
+    padding: 8px 12px;  /* Réduire la taille du bouton */
+  }
+}

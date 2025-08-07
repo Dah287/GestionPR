@@ -11,7 +11,7 @@ const ChatTemplatee = () => {
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: "http://localhost:8080/chat", // URL WebSocket du backend
+      brokerURL: "http://192.168.1.81:8080/chat", // URL WebSocket du backend
       connectHeaders: {
         // Si nécessaire, vous pouvez envoyer des informations d'en-tête ici
       },

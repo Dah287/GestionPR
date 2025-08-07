@@ -17,17 +17,46 @@ const Login = () => {
     setError(""); // Réinitialise le message d'erreur à chaque tentative
 
     try {
-      const response = await axios.post("http://localhost:8081/utilisateurs/login", { nom, password });
-      
+      const response = await axios.post("http://192.168.1.81:8081/utilisateurs/login", { nom, password });
+      let timeout;
+
+      const setLogoutTimeout = () => {
+        // Supprimer le précédent timeout (si existe)
+        clearTimeout(timeout);
+
+        // Créer un nouveau timeout pour la déconnexion après 5 minutes (300000 ms)
+        console.log(timeout)
+        timeout = setTimeout(() => {
+          // Déconnexion de l'utilisateur
+          localStorage.removeItem("id_utilisateur");
+          localStorage.removeItem("role_utilisateur");
+
+          // Rediriger l'utilisateur vers la page de connexion
+          navigate("/login");
+        }, 10 * 60 * 1000); // 5 minutes
+      };
+
+
       if (response.data) {
         console.log("Data :", response.data);
         localStorage.setItem("id_utilisateur", response.data.id);
         localStorage.setItem("role_utilisateur", response.data.role); // Stocker le rôle
+
+
+
+                // Déconnecter après 5 minutes
+                setLogoutTimeout();
+
+
         if (response.data.role === "Chef de projet") {
             navigate("/projet"); // Rediriger vers /projet si le rôle est Chef de projet
           } else {
             navigate("/MesTaches"); // Rediriger vers /MesTaches sinon
           }
+
+           // Ajouter des écouteurs d'événements pour réinitialiser le timeout lors des interactions de l'utilisateur
+    window.addEventListener('mousemove', setLogoutTimeout);  // Détecte le mouvement de la souris
+    window.addEventListener('keydown', setLogoutTimeout);   // Détecte la frappe de la touche du clavier
       }
     } catch (error) {
       setError("Identifiants incorrects !"); // Affiche le message d'erreur en cas d'échec
