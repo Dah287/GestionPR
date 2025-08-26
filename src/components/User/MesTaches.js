@@ -268,7 +268,7 @@ const handleSubmit2 = async (e) => {
     <div className="task-list-container">
       {/* Conteneur du titre et du bouton sur la même ligne */}
       <div className="vc">
-        <h3>Mes Taches</h3>
+        <h3>Tâches affectées</h3>
         {/* <button onClick={handleOpenModal} className="add-task-btn">
           Ajouter une tâche
         </button> */}

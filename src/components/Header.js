@@ -248,19 +248,19 @@ const Header = () => {
         <Toolbar /> {/* Espace pour la barre d'appbar */}
         <Box sx={{ overflow: 'auto' }}>
           <List>
-          {role === "admin" && (
+          {/* {role === "admin" && ( */}
             <ListItem button onClick={() => navigate("/projet")}>
               <ListItemIcon><Home /></ListItemIcon>
               <ListItemText primary="Projets" />
             </ListItem>
-            )}
+            {/* )} */}
 
-            {role === "user" && (
+            {/* {role === "user" && ( */}
               <ListItem button onClick={() => navigate("/MesTaches")}>
                 <ListItemIcon><AssignmentIcon /></ListItemIcon>
-                <ListItemText primary="Mes Taches" />
+                <ListItemText primary="Tâches affectées" />
               </ListItem>
-            )}
+            {/* )} */}
             
             <ListItem button onClick={() => navigate("/dashboard")}>
               <ListItemIcon><InsertChartIcon /></ListItemIcon>
