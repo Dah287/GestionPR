@@ -204,7 +204,7 @@
 /* Base Styles */
 .projects-dashboard {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -527,3 +527,16 @@
   }
 }
 
+.projects-separator {
+  margin: 10px 0 20px 0;
+  border: 0;
+  height: 1px;
+  background: #ddd;
+}
+
+.no-projects {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 1.1em;
+}

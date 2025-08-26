@@ -15,22 +15,32 @@ const Chat = ({ userId }) => {
     
 
     useEffect(() => {
-        axios.get('http://192.168.1.81:8081/utilisateurs')
+
+          const token = localStorage.getItem("token");
+
+        axios.get('http://localhost:8081/utilisateurs', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
             .then(response => setUsers(response.data))
             .catch(error => console.error('Erreur lors de la récupération des utilisateurs', error));
     }, []);
+useEffect(() => {
+  const socket = new SockJS('http://localhost:8081/ws');
+  const client = Stomp.over(socket);
+  const token = localStorage.getItem("token");
 
-    useEffect(() => {
-        const socket = new SockJS('http://192.168.1.81:8081/ws');
-        const client = Stomp.over(socket);
-        
-
-        client.connect({}, () => {
-            console.log('✅ WebSocket STOMP connecté avec succès');
-            setStompClient(client);
-        }, (error) => {
-            console.error('❌ Erreur de connexion STOMP:', error);
-        });
+  client.connect(
+    { Authorization: `Bearer ${token}` }, // <-- envoi du token JWT
+    () => {
+      console.log('✅ WebSocket STOMP connecté avec succès');
+      setStompClient(client);
+    },
+    (error) => {
+      console.error('❌ Erreur de connexion STOMP:', error);
+    }
+  );
 
         // return () => {
         //     if (client) {
@@ -60,7 +70,7 @@ const Chat = ({ userId }) => {
 
     // useEffect(() => {
     //     if (recipientId) {
-    //         axios.get('http://192.168.1.81:8081/api/chat/allMessages')
+    //         axios.get('http://localhost:8081/api/chat/allMessages')
     //             .then(response => setMessages(response.data))
     //             .catch(error => console.error('Erreur lors de la récupération des messages', error));
     //     } else {
@@ -70,8 +80,14 @@ const Chat = ({ userId }) => {
 
     useEffect(() => {
         if (recipientId) {
+
             const fetchMessages = () => {
-                axios.get('http://192.168.1.81:8081/api/chat/allMessages')
+                  const token = localStorage.getItem("token");
+                axios.get('http://localhost:8081/api/chat/allMessages', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
                     .then(response => setMessages(response.data))
                     .catch(error => console.error('Erreur lors de la récupération des messages', error));
             };
@@ -125,15 +141,28 @@ const Chat = ({ userId }) => {
                 <h3>Utilisateurs</h3>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                     {sortedUsers.map(user => (
-                        <li key={user.id} onClick={() => setRecipientId(user.id)}
-                            style={{
-                                cursor: 'pointer', padding: '10px',
-                                backgroundColor: recipientId === user.id ? '#e0e0e0' : 'transparent',
-                                display: 'flex', alignItems: 'center', borderRadius: '5px'
-                            }}>
-                            <Avatar src={user.profileImage || `/icon${user.id}.png`} alt="Avatar" />
-                            <span style={{ flexGrow: 1, marginLeft: '10px' }}>{user.id === parseInt(userId) ? `Moi (${user.nom})` : user.nom}</span>
-                        </li>
+<li key={user.id} onClick={() => setRecipientId(user.id)}
+    style={{
+        cursor: 'pointer',
+        padding: '10px',
+        backgroundColor: recipientId === user.id ? '#e0e0e0' : 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        borderRadius: '5px'
+    }}>
+    <Avatar
+        style={{
+            backgroundColor: '#808080', // ou utilise getAvatarColor(user.nom)
+            color: '#fff',
+            marginRight: '10px'
+        }}
+    >
+        {user.nom?.charAt(0).toUpperCase()}
+    </Avatar>
+    <span style={{ flexGrow: 1, marginLeft: '10px' }}>
+        {user.id === parseInt(userId) ? `Moi (${user.nom})` : user.nom}
+    </span>
+</li>
                     ))}
                 </ul>
             </div>

@@ -1,9 +1,8 @@
 import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { Avatar } from "antd";
+import { Avatar, Tooltip } from "antd";
 import { FaRegClock, FaSpinner, FaCheckCircle } from "react-icons/fa";
-import { Tooltip } from "antd";  // Importer Tooltip d'Ant Design
 
 const Container = styled.div`
     border-radius: 10px;
@@ -21,45 +20,30 @@ const Container = styled.div`
     flex-direction: column;
 `;
 
-const TextContent = styled.div``;
-
 const Icons = styled.div`
     display: flex;
-    justify-content: space-between; /* Place les éléments aux extrémités */
+    justify-content: space-between;
     padding: 2px;
-    align-items: center; /* Centrer verticalement les éléments */
+    align-items: center;
 `;
 
 function bgcolorChange(props) {
     return props.isDragging
         ? "lightgreen"
         : props.isDraggable
-            ? props.isBacklog
-                ? "#F2D7D5"
-                : "#DCDCDC"
-            : props.isBacklog
-                ? "#F2D7D5"
-                : "#EAF4FC";
+        ? props.isBacklog
+            ? "#F2D7D5"
+            : "#DCDCDC"
+        : props.isBacklog
+        ? "#F2D7D5"
+        : "#EAF4FC";
 }
 
 export default function Card({ task, index }) {
     const updateTaskStatus = (id, status) => {
         console.log(`Mettre à jour le statut de la tâche ${id} vers ${status}`);
-        // Ajoutez ici votre logique pour mettre à jour le statut de la tâche
+        // TODO: appeler l’API pour update
     };
-
-    const TextContent = ({ children }) => (
-        <div
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '500px',
-          }}
-        >
-          {children}
-        </div>
-      );
 
     return (
         <Draggable draggableId={`${task.id}`} key={task.id} index={index}>
@@ -70,18 +54,28 @@ export default function Card({ task, index }) {
                     ref={provided.innerRef}
                     isDragging={snapshot.isDragging}
                 >
+                    {/* ID de tâche */}
                     <div style={{ display: "flex", justifyContent: "start", padding: 2 }}>
-                        <span>
-                            <small>
-                                #{task.id} {"  "}
-                            </small>
-                        </span>
+                        <small>#{task.id}</small>
                     </div>
+
+                    {/* Titre */}
                     <div style={{ display: "flex", justifyContent: "center", padding: 2 }}>
-                        <TextContent>{task.title}</TextContent>
+                        <div
+                            style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                maxWidth: "500px",
+                            }}
+                        >
+                            {task.title}
+                        </div>
                     </div>
+
+                    {/* Icônes + avatar */}
                     <Icons>
-                        {/* Icônes à gauche */}
+                        {/* Icônes statut */}
                         <div style={{ display: "flex", gap: "10px" }}>
                             <Tooltip title="Changer statut à TODO">
                                 <FaRegClock
@@ -106,13 +100,14 @@ export default function Card({ task, index }) {
                             </Tooltip>
                         </div>
 
-                        {/* Avatar à droite */}
+                        {/* Avatar utilisateur */}
                         <Avatar
-                            onClick={() => console.log(task)}
-                            src={`/icon${task.utilisateur.id}.png`}
-                        />
+                            style={{ backgroundColor: "#1890ff" }}
+                            src={task.utilisateur ? `/icon${task.utilisateur.id}.png` : undefined}
+                        >
+                            {!task.utilisateur ? "?" : task.utilisateur.nom?.[0] || "U"}
+                        </Avatar>
                     </Icons>
-                    {provided.placeholder}
                 </Container>
             )}
         </Draggable>

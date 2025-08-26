@@ -49,7 +49,7 @@
 
 //         {/* Boutons de navigation */}
 
-//         {role === "Chef de projet" && (
+//         {role === "admin" && (
 //         <button className="header-btn mm" onClick={handUser}>
 //           Gérer les utilisateurs
 //         </button>
@@ -67,8 +67,8 @@
 //         </a>
 //       </div>
 //       <ul>
-//       {role === "Chef de projet" && (    <li><a href="/projet"><Home size={20} /> <span>Projets</span></a></li>)}
-//         {role === "Utilisateur Normal" && (   <li><a href="/MesTaches"><BarChart size={20} /> <span>Mes Taches</span></a></li>)}
+//       {role === "admin" && (    <li><a href="/projet"><Home size={20} /> <span>Projets</span></a></li>)}
+//         {role === "user" && (   <li><a href="/MesTaches"><BarChart size={20} /> <span>Mes Taches</span></a></li>)}
 //         <li><a href="/dashboard"><BarChart size={20} /> <span>Dashboard</span></a></li>
 //         <li><a href="/listFiltre"><Inbox size={20} /> <span>Taches</span></a></li>
 //         <li><a href="/board"><Grid size={20} /> <span>Board</span></a></li>
@@ -179,7 +179,7 @@ const Header = () => {
             ORMVAD-Gestion De Projet
           </Typography>
           
-          {role === "Chef de projet" && (
+          {role === "admin" && (
             <IconButton color="inherit" onClick={handleUser} sx={{ mr: 1 }}>
               <PeopleIcon />
             </IconButton>
@@ -237,10 +237,10 @@ const Header = () => {
         variant="persistent"
         open={drawerOpen}
         sx={{
-          width: drawerOpen ? 240 : 0,
+          width: drawerOpen ? 170 : 0,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerOpen ? 240 : 0,
+            width: drawerOpen ? 170 : 0,
             boxSizing: 'border-box',
           },
         }}
@@ -248,14 +248,14 @@ const Header = () => {
         <Toolbar /> {/* Espace pour la barre d'appbar */}
         <Box sx={{ overflow: 'auto' }}>
           <List>
-          {role === "Chef de projet" && (
+          {role === "admin" && (
             <ListItem button onClick={() => navigate("/projet")}>
               <ListItemIcon><Home /></ListItemIcon>
               <ListItemText primary="Projets" />
             </ListItem>
             )}
 
-            {role === "Utilisateur Normal" && (
+            {role === "user" && (
               <ListItem button onClick={() => navigate("/MesTaches")}>
                 <ListItemIcon><AssignmentIcon /></ListItemIcon>
                 <ListItemText primary="Mes Taches" />
@@ -282,7 +282,7 @@ const Header = () => {
               <ListItemText primary="Chat" />
             </ListItem>
             
-            {role === "Chef de projet" && (
+            {role === "admin" && (
             <ListItem button onClick={() => navigate("/user")}>
               <ListItemIcon><User /></ListItemIcon>
               <ListItemText primary="Utilisateur" />

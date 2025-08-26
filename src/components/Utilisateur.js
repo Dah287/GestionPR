@@ -13,67 +13,96 @@ const Utilisateur = () => {
   });
   const [editUser, setEditUser] = useState(null); // Utilisateur sélectionné pour la mise à jour
 
-  useEffect(() => {
-    fetch("http://192.168.1.81:8081/utilisateurs")
+useEffect(() => {
+  const token = localStorage.getItem("token"); // récupère le token stocké au login
+
+  fetch("http://localhost:8081/utilisateurs", {
+    headers: {
+      Authorization: `Bearer ${token}`, // <-- ajout du token
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      setUtilisateurs(data);
+    })
+    .catch((error) =>
+      console.error("Erreur lors du chargement des utilisateurs :", error)
+    );
+}, []);
+
+const handleAddUser = () => {
+  const token = localStorage.getItem("token");
+
+  fetch("http://localhost:8081/utilisateurs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // <-- ajout du token
+    },
+    body: JSON.stringify(newUser),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      setUtilisateurs([...utilisateurs, data]);
+      setShowModal(false);
+      setNewUser({ nom: "", email: "", password: "", role: "" });
+    })
+    .catch((error) =>
+      console.error("Erreur lors de l'ajout de l'utilisateur :", error)
+    );
+};
+
+const handleDeleteUser = (userId) => {
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
+    const token = localStorage.getItem("token");
+
+    fetch(`http://localhost:8081/utilisateurs/${userId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`, // <-- ajout du token
+      },
+    })
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          throw new Error("Erreur lors de la suppression de l'utilisateur");
         }
-        return response.json();
+        setUtilisateurs(utilisateurs.filter((user) => user.id !== userId));
       })
-      .then((data) => {
-        setUtilisateurs(data);
-      })
-      .catch((error) => console.error("Erreur lors du chargement des utilisateurs :", error));
-  }, []);
+      .catch((error) =>
+        console.error("Erreur lors de la suppression de l'utilisateur :", error)
+      );
+  }
+};
 
-  const handleAddUser = () => {
-    fetch("http://192.168.1.81:8081/utilisateurs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newUser),
+const handleUpdateUser = () => {
+  const token = localStorage.getItem("token");
+
+  fetch(`http://localhost:8081/utilisateurs/${editUser.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // <-- ajout du token
+    },
+    body: JSON.stringify(editUser),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      setUtilisateurs(
+        utilisateurs.map((user) =>
+          user.id === data.id ? { ...user, ...data } : user
+        )
+      );
+      setEditUser(null);
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setUtilisateurs([...utilisateurs, data]);
-        setShowModal(false);
-        setNewUser({ nom: "", email: "", password: "", role: "" });
-      })
-      .catch((error) => console.error("Erreur lors de l'ajout de l'utilisateur :", error));
-  };
-
-  const handleDeleteUser = (userId) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-      fetch(`http://192.168.1.81:8081/utilisateurs/${userId}`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Erreur lors de la suppression de l'utilisateur");
-          }
-          setUtilisateurs(utilisateurs.filter((user) => user.id !== userId));
-        })
-        .catch((error) => console.error("Erreur lors de la suppression de l'utilisateur :", error));
-    }
-  };
-
-  const handleUpdateUser = () => {
-    fetch(`http://192.168.1.81:8081/utilisateurs/${editUser.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editUser),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setUtilisateurs(
-          utilisateurs.map((user) =>
-            user.id === data.id ? { ...user, ...data } : user
-          )
-        );
-        setEditUser(null); // Réinitialiser après la mise à jour
-      })
-      .catch((error) => console.error("Erreur lors de la mise à jour de l'utilisateur :", error));
-  };
+    .catch((error) =>
+      console.error("Erreur lors de la mise à jour de l'utilisateur :", error)
+    );
+};
 
   return (
     <div className="users-list-container">
@@ -83,7 +112,8 @@ const Utilisateur = () => {
           <FaPlus className="icon" /> Ajouter utilisateur
         </button>
       </div>
-
+   {/* Separator */}
+    <hr className="projects-separator" />
       <div className="user-list">
         {utilisateurs.map((user) => (
           <div
@@ -153,8 +183,8 @@ const Utilisateur = () => {
         onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
       >
         <option value="">Sélectionner un rôle</option>
-        <option value="Chef de projet">Chef de projet</option>
-        <option value="Utilisateur Normal">Utilisateur Normal</option>
+        <option value="admin">admin</option>
+        <option value="user">user</option>
       </select>
       
       <div className="modal-buttons">
@@ -203,8 +233,8 @@ const Utilisateur = () => {
         value={editUser.role}
         onChange={(e) => setEditUser({ ...editUser, role: e.target.value })}
       >
-        <option value="Chef de projet">Chef de projet</option>
-        <option value="Utilisateur Normal">Utilisateur Normal</option>
+        <option value="admin">admin</option>
+        <option value="user">user</option>
       </select>
       
       <div className="modal-buttons">

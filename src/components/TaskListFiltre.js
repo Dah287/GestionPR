@@ -22,7 +22,13 @@ export default function TaskListFiltre() {
   useEffect(() => {
     const fetchProjets = async () => {
       try {
-        const response = await fetch(`http://192.168.1.81:8081/projets/responsable/${idUtilisateur}`);
+      const token = localStorage.getItem("token"); // récupération du token
+
+      const response = await fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`, // ajout du token
+        },
+      });
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
         const data = await response.json();
         setProjets(data);
@@ -43,7 +49,13 @@ useEffect(() => {
   useEffect(() => {
     const fetchUtilisateurs = async () => {
       try {
-        const response = await fetch("http://192.168.1.81:8081/utilisateurs");
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:8081/utilisateurs", {
+        headers: {
+          "Authorization": `Bearer ${token}`, // ajout du token
+        },
+      });
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
         const data = await response.json();
         setUtilisateurs(data);
@@ -60,9 +72,15 @@ useEffect(() => {
       if (!selectedProjet) return;
       
       try {
-        console.log("Fetching tasks for project:", selectedProjet);
-        
-        const response = await fetch(`http://192.168.1.81:8081/projets/${selectedProjet}/taches`);
+      const token = localStorage.getItem("token");
+
+      console.log("Fetching tasks for project:", selectedProjet);
+
+      const response = await fetch(`http://localhost:8081/projets/${selectedProjet}/taches`, {
+        headers: {
+          "Authorization": `Bearer ${token}`, // ajout du token
+        },
+      });
         
         // Debug: Vérifiez la réponse complète
         console.log("Full response:", {
@@ -108,24 +126,39 @@ useEffect(() => {
 
 
 
-  useEffect(() => {
-    const fetchUtilisateurs = async () => {
-      try {
-        const response = await fetch("http://192.168.1.81:8081/utilisateurs");
+useEffect(() => {
+  const fetchProjets = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+      const response = await fetch(
+        `http://localhost:8081/projets/responsable/${idUtilisateur}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
         }
+      );
 
-        const data = await response.json();
-        setUtilisateurs(data); // Stocker la liste des utilisateurs
-      } catch (error) {
-        console.error("Erreur lors du chargement des utilisateurs :", error);
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+      const data = await response.json();
+      setProjets(data);
+
+      console.log("Données reçues:", data);
+
+      // 👉 Auto-sélection si un seul projet
+      if (data.length === 1) {
+        setSelectedProjet(data[0].id);
+        localStorage.setItem("selectedProjet", data[0].id);
       }
-    };
 
-    fetchUtilisateurs();
-  }, []);
+    } catch (error) {
+      console.error("Erreur:", error);
+    }
+  };
+  fetchProjets();
+}, []);
+
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination || source.droppableId === destination.droppableId) return;
@@ -172,11 +205,17 @@ useEffect(() => {
 
   function updateTaskInDatabase(task) {
     console.log("Updating task in DB:", task);
-    fetch(`http://192.168.1.81:8081/api/tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    })
+  // Récupérer le token du localStorage
+  const token = localStorage.getItem("token");
+
+  fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+    method: "PUT",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // Ajout du token
+    },
+    body: JSON.stringify(task),
+  })
       .then((response) => response.json())
       .then((json) => console.log("Response from DB:", json))
       .catch((error) => console.error("Error updating task in DB:", error));
@@ -241,11 +280,19 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://192.168.1.81:8081/api/tasks/tache/${selectedTask.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selectedTask),
-    });
+    const token = localStorage.getItem("token"); // Récupère ton JWT
+
+    const response = await fetch(
+      `http://localhost:8081/api/tasks/tache/${selectedTask.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Ajout du token
+        },
+        body: JSON.stringify(selectedTask),
+      }
+    );
     if (!response.ok) throw new Error("Erreur lors de la modification de la tâche");
     setIsModalOpenn(false);
     window.location.reload();
@@ -306,13 +353,16 @@ const handleSubmit2 = async (e) => {
     console.log("new task :", newTask);
   
     try {
-      const response = await fetch(`http://192.168.1.81:8081/api/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newTask),
-      });
+ const token = localStorage.getItem("token"); // Récupère ton JWT
+
+    const response = await fetch(`http://localhost:8081/api/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Ajout du token
+      },
+      body: JSON.stringify(newTask),
+    });
   
       if (!response.ok) {
         throw new Error("Erreur lors de l'ajout de la tâche");
@@ -388,6 +438,9 @@ const handleSubmit2 = async (e) => {
           Ajouter une tâche
         </button>
       </div>
+
+         {/* Separator */}
+    <hr className="projects-separator" />
         {/* Ajouter Tache */}
       {isModalOpen && (
         <div className="modal">
@@ -582,7 +635,8 @@ const handleSubmit2 = async (e) => {
               </div>
             )}
           </Droppable>
-  
+     {/* Separator */}
+    <hr className="projects-separator" />
           {/* In Progress List */}
           <Droppable droppableId="2">
             {(provided) => (
@@ -638,7 +692,8 @@ const handleSubmit2 = async (e) => {
               </div>
             )}
           </Droppable>
-  
+     {/* Separator */}
+    <hr className="projects-separator" />
           {/* Done List */}
           <Droppable droppableId="3">
             {(provided) => (

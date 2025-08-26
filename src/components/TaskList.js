@@ -13,51 +13,65 @@ export default function TaskList() {
 
 
   const projetId = localStorage.getItem("selectedProjet");
-  useEffect(() => {
-    const fetchTaches = async () => {
-      try {
-        const response = await fetch(`http://192.168.1.81:8081/projets/${projetId}/taches`);
-        
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-  
-        const json = await response.json();
-        console.log("Données reçues :", json);
-  
-        setTodo(json.filter((task) => task.status === "TODO"));
-        setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
-        setDone(json.filter((task) => task.status === "DONE"));
-      } catch (error) {
-        console.error("Erreur lors du chargement des tâches :", error);
+useEffect(() => { 
+  const fetchTaches = async () => {
+    try {
+      const token = localStorage.getItem("token"); // 🔑 Récupération du JWT
+
+      const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // 🔑 Ajout du token
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
-    };
-  
-    if (projetId) {
-      fetchTaches();
+
+      const json = await response.json();
+      console.log("Données reçues :", json);
+
+      setTodo(json.filter((task) => task.status === "TODO"));
+      setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
+      setDone(json.filter((task) => task.status === "DONE"));
+    } catch (error) {
+      console.error("Erreur lors du chargement des tâches :", error);
     }
-  }, [projetId]); // Ajoute projetId comme dépendance
-  
-  const [utilisateurs, setUtilisateurs] = useState([]);
+  };
 
-  useEffect(() => {
-    const fetchUtilisateurs = async () => {
-      try {
-        const response = await fetch("http://192.168.1.81:8081/utilisateurs");
+  if (projetId) {
+    fetchTaches();
+  }
+}, [projetId]); // Ajoute projetId comme dépendance
 
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
 
-        const data = await response.json();
-        setUtilisateurs(data); // Stocker la liste des utilisateurs
-      } catch (error) {
-        console.error("Erreur lors du chargement des utilisateurs :", error);
+const [utilisateurs, setUtilisateurs] = useState([]);
+
+useEffect(() => {
+  const fetchUtilisateurs = async () => {
+    try {
+      const token = localStorage.getItem("token"); // 🔑 Récupération du JWT
+
+      const response = await fetch("http://localhost:8081/utilisateurs", {
+        headers: {
+          Authorization: `Bearer ${token}`, // 🔑 Ajout du token
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
-    };
 
-    fetchUtilisateurs();
-  }, []);
+      const data = await response.json();
+      setUtilisateurs(data); // Stocker la liste des utilisateurs
+    } catch (error) {
+      console.error("Erreur lors du chargement des utilisateurs :", error);
+    }
+  };
+
+  fetchUtilisateurs();
+}, []);
+
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination || source.droppableId === destination.droppableId) return;
@@ -102,17 +116,29 @@ export default function TaskList() {
     updateTaskInDatabase(updatedTask);
   }
 
-  function updateTaskInDatabase(task) {
-    console.log("Updating task in DB:", task);
-    fetch(`http://192.168.1.81:8081/api/tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
+function updateTaskInDatabase(task) {
+  console.log("Updating task in DB:", task);
+
+  // Récupération du token (par ex. depuis localStorage)
+  const token = localStorage.getItem("token");
+
+  fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`, // ✅ envoi du token ici
+    },
+    body: JSON.stringify(task),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour de la tâche");
+      }
+      return response.json();
     })
-      .then((response) => response.json())
-      .then((json) => console.log("Response from DB:", json))
-      .catch((error) => console.error("Error updating task in DB:", error));
-  }
+    .then((json) => console.log("Response from DB:", json))
+    .catch((error) => console.error("Error updating task in DB:", error));
+}
 
   function findItemById(id, array) {
     return array.find((item) => item.id == id);
@@ -173,18 +199,27 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://192.168.1.81:8081/api/tasks/tache/${selectedTask.id}`, {
+    const token = localStorage.getItem("token"); // récupération du token stocké
+
+    const response = await fetch(`http://localhost:8081/api/tasks/tache/${selectedTask.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // ajout du token ici
+      },
       body: JSON.stringify(selectedTask),
     });
+
     if (!response.ok) throw new Error("Erreur lors de la modification de la tâche");
+
     setIsModalOpenn(false);
     window.location.reload();
+
   } catch (error) {
     console.error("Erreur :", error);
   }
 };
+
 
   
   const handleOpenModal = () => {
@@ -219,64 +254,68 @@ const handleSubmit2 = async (e) => {
   };
   
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const projetId = localStorage.getItem("selectedProjet");
-    if (!projetId) {
-      alert("Projet non sélectionné !");
-      return;
-    }
-  
-    const newTask = {
-      ...task,
-      projet: {
-        id: parseInt(projetId),
-      },
-    };
-  
-    console.log("new task :", newTask);
-  
-    try {
-      const response = await fetch(`http://192.168.1.81:8081/api/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newTask),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'ajout de la tâche");
-      }
-  
-      const savedTask = await response.json();
-      console.log("Tâche enregistrée :", savedTask);
-  
-      // Mise à jour de l'état local en fonction du statut
-      switch (savedTask.status) {
-        case "TODO":
-          setTodo([...todo, savedTask]);
-          break;
-        case "IN_PROGRESS":
-          setInProgress([...inProgress, savedTask]);
-          break;
-        case "DONE":
-          setDone([...done, savedTask]);
-          break;
-        default:
-          break;
-      }
-  
-      setIsModalOpen(false); // Fermer la modal après succès
-      setTask({ title: "", userId: "", status: "TODO", projet: { id: "" } }); // Réinitialiser le formulaire
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      window.location.reload(); // Cela va recharger la page
-    } catch (error) {
-      console.error("Erreur :", error);
-      alert("Une erreur est survenue lors de l'ajout de la tâche.");
-    }
+  const projetId = localStorage.getItem("selectedProjet");
+  if (!projetId) {
+    alert("Projet non sélectionné !");
+    return;
+  }
+
+  const newTask = {
+    ...task,
+    projet: {
+      id: parseInt(projetId),
+    },
   };
+
+  console.log("new task :", newTask);
+
+  try {
+    const token = localStorage.getItem("token"); // récupération du token
+
+    const response = await fetch(`http://localhost:8081/api/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // ajout du token ici
+      },
+      body: JSON.stringify(newTask),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de l'ajout de la tâche");
+    }
+
+    const savedTask = await response.json();
+    console.log("Tâche enregistrée :", savedTask);
+
+    // Mise à jour de l'état local en fonction du statut
+    switch (savedTask.status) {
+      case "TODO":
+        setTodo([...todo, savedTask]);
+        break;
+      case "IN_PROGRESS":
+        setInProgress([...inProgress, savedTask]);
+        break;
+      case "DONE":
+        setDone([...done, savedTask]);
+        break;
+      default:
+        break;
+    }
+
+    setIsModalOpen(false); // Fermer la modal après succès
+    setTask({ title: "", userId: "", status: "TODO", projet: { id: "" } }); // Réinitialiser le formulaire
+
+    window.location.reload(); // Cela va recharger la page
+  } catch (error) {
+    console.error("Erreur :", error);
+    alert("Une erreur est survenue lors de l'ajout de la tâche.");
+  }
+};
+
   
   
   const userId = localStorage.getItem("id_utilisateur");
@@ -288,11 +327,13 @@ const handleSubmit2 = async (e) => {
     <div className="task-list-container">
       {/* Conteneur du titre et du bouton sur la même ligne */}
       <div className="vc">
-        <h3>Liste des Taches pour le projet selectionne</h3>
+        <h3>Liste des Taches Pour le Projet Selectionne</h3>
         <button onClick={handleOpenModal} className="add-task-btn">
           Ajouter une tâche
         </button>
       </div>
+         {/* Separator */}
+    <hr className="projects-separator" />
         {/* Ajouter Tache */}
       {isModalOpen && (
         <div className="modal">
@@ -487,7 +528,8 @@ const handleSubmit2 = async (e) => {
               </div>
             )}
           </Droppable>
-  
+     {/* Separator */}
+    <hr className="projects-separator" />
           {/* In Progress List */}
           <Droppable droppableId="2">
             {(provided) => (
@@ -543,7 +585,8 @@ const handleSubmit2 = async (e) => {
               </div>
             )}
           </Droppable>
-  
+     {/* Separator */}
+    <hr className="projects-separator" />
           {/* Done List */}
           <Droppable droppableId="3">
             {(provided) => (

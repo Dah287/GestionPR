@@ -103,7 +103,7 @@
 /* Contenu principal avec un padding-left suffisant pour ne pas être recouvert par la nav */
 .content {
   flex: 1;
-  margin-left: 100px; /* Donne de l'espace pour la nav à gauche */
+  margin-left: 160px; /* Donne de l'espace pour la nav à gauche */
   padding: 20px;
   overflow-y: auto; /* Pour gérer le défilement si nécessaire */
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
-
+import axios from "axios";
 import Column from "./Column";
 import "./TaskList.css";
 const TaskBoard = () => {
@@ -8,31 +8,33 @@ const TaskBoard = () => {
     const [inProgress, setInProgress] = useState([]);
     const [done, setDone] = useState([]);
     const projetId = localStorage.getItem("selectedProjet");
-    useEffect(() => {
-        const fetchTaches = async () => {
-          try {
-            const response = await fetch(`http://192.168.1.81:8081/projets/${projetId}/taches`);
-            
-            if (!response.ok) {
-              throw new Error(`Erreur HTTP: ${response.status}`);
-            }
+ useEffect(() => {
+  const fetchTaches = async () => {
+    try {
+      const token = localStorage.getItem("token"); // ou depuis Redux/Context
       
-            const json = await response.json();
-            console.log("Données reçues :", json);
-      
-            setTodo(json.filter((task) => task.status === "TODO"));
-            setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
-            setDone(json.filter((task) => task.status === "DONE"));
-          } catch (error) {
-            console.error("Erreur lors du chargement des tâches :", error);
-          }
-        };
-      
-        if (projetId) {
-          fetchTaches();
-        }
-      }, [projetId]); // Ajoute projetId comme dépendance
-      
+      const response = await axios.get(`http://localhost:8081/projets/${projetId}/taches`, {
+        headers: {
+          Authorization: `Bearer ${token}`,  // Ajout du token
+        },
+      });
+
+      const json = response.data;
+      console.log("Données reçues :", json);
+
+      setTodo(json.filter((task) => task.status === "TODO"));
+      setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
+      setDone(json.filter((task) => task.status === "DONE"));
+    } catch (error) {
+      console.error("Erreur lors du chargement des tâches :", error);
+    }
+  };
+
+  if (projetId) {
+    fetchTaches();
+  }
+}, [projetId]);
+
 
     const handleDragEnd = (result) => {
         const { destination, source, draggableId } = result;
@@ -80,7 +82,7 @@ const TaskBoard = () => {
 
     function updateTaskInDatabase(task) {
         console.log("Updating task in DB:", task); // Debugger pour voir la tâche envoyée
-        fetch(`http://192.168.1.81:8081/api/tasks/${task.id}`, {
+        fetch(`http://localhost:8081/api/tasks/${task.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(task)

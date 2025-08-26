@@ -57,4 +57,5 @@ export default function Column({ title, tasks, id }) {
             </Droppable>
         </Container>
     );
+    
 }

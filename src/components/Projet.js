@@ -24,90 +24,121 @@ const Projet = () => {
   });
 
   useEffect(() => {
+  const token = localStorage.getItem("token"); // Récupère le JWT stocké après login
 
-    // if (!idUtilisateur) {
-    //     console.error("Aucun utilisateur connecté !");
-    //     return;
-    //   }
-    fetch(`http://192.168.1.81:8081/projets/responsable/${idUtilisateur}`)
+  fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`, {
+    headers: {
+      Authorization: `Bearer ${token}`, // <-- Ajout du token
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      if (!text) {
+        throw new Error("Réponse vide");
+      }
+      return JSON.parse(text);
+    })
+    .then((data) => {
+      console.log("Données reçues :", data);
+      if (!Array.isArray(data)) {
+        throw new Error("Format JSON invalide : attendu un tableau");
+      }
+
+      // Charger les tâches pour chaque projet
+      const projetsAvecTaches = data.map((projet) =>
+        fetch(`http://localhost:8081/projets/${projet.id}/taches`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // <-- Ajout du token
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((taches) => ({ ...projet, taches }))
+          .catch((error) => {
+            console.error(
+              `Erreur lors du chargement des tâches du projet ${projet.id}`,
+              error
+            );
+            return { ...projet, taches: [] };
+          })
+      );
+
+      return Promise.all(projetsAvecTaches);
+    })
+    .then((projetsFinal) => {
+      setProjets(projetsFinal);
+    })
+    .catch((error) =>
+      console.error("Erreur lors du chargement des projets :", error)
+    );
+}, [idUtilisateur]);
+
+// Ajout d’un projet
+const newProjet1 = {
+  ...newProjet,
+  responsable: {
+    id: parseInt(idUtilisateur),
+  },
+};
+
+const handleAddProject = () => {
+  const token = localStorage.getItem("token");
+
+  fetch("http://localhost:8081/projets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // <-- Ajout du token
+    },
+    body: JSON.stringify(newProjet1),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      setProjets([...projets, data]);
+      setShowModal(false);
+      setNewProjet({
+        name: "",
+        description: "",
+        priority: "",
+        commencer: "",
+        fin: "",
+      });
+    })
+    .catch((error) => console.error("Erreur lors de l'ajout du projet :", error));
+};
+
+// Suppression d’un projet
+const handleDeleteProject = (projetId) => {
+  const token = localStorage.getItem("token");
+
+  if (window.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
+    fetch(`http://localhost:8081/projets/${projetId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`, // <-- Ajout du token
+      },
+    })
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
+          throw new Error("Erreur lors de la suppression du projet");
         }
-        return response.text();
+        setProjets(projets.filter((projet) => projet.id !== projetId));
       })
-      .then((text) => {
-        if (!text) {
-          throw new Error("Réponse vide");
-        }
-        return JSON.parse(text);
-      })
-      .then((data) => {
-        console.log("Données reçues :", data);
-        if (!Array.isArray(data)) {
-          throw new Error("Format JSON invalide : attendu un tableau");
-        }
+      .catch((error) =>
+        console.error("Erreur lors de la suppression du projet :", error)
+      );
+  }
+};
 
-        const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://192.168.1.81:8081/projets/${projet.id}/taches`)
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-              }
-              return response.json();
-            })
-            .then((taches) => ({ ...projet, taches }))
-            .catch((error) => {
-              console.error(`Erreur lors du chargement des tâches du projet ${projet.id}`, error);
-              return { ...projet, taches: [] };
-            })
-        );
-
-        return Promise.all(projetsAvecTaches);
-      })
-      .then((projetsFinal) => {
-        setProjets(projetsFinal);
-      })
-      .catch((error) => console.error("Erreur lors du chargement des projets :", error));
-  }, []);
-
-  const newProjet1 = {
-    ...newProjet,
-    responsable: {
-      id: parseInt(idUtilisateur),
-    },
-  };
-
-  const handleAddProject = () => {
-    fetch("http://192.168.1.81:8081/projets", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newProjet1),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setProjets([...projets, data]);
-        setShowModal(false);
-        setNewProjet({ name: "", description: "",    priority: "", commencer: "",     fin: ""});
-      })
-      .catch((error) => console.error("Erreur lors de l'ajout du projet :", error));
-  };
-
-  const handleDeleteProject = (projetId) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
-      fetch(`http://192.168.1.81:8081/projets/${projetId}`, {
-        method: "DELETE",
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Erreur lors de la suppression du projet");
-          }
-          // Mettre à jour la liste des projets après suppression
-          setProjets(projets.filter((projet) => projet.id !== projetId));
-        })
-        .catch((error) => console.error("Erreur lors de la suppression du projet :", error));
-    }
-  };
 
   const calculateStatusPercentage = (taches, status) => {
     if (!taches || taches.length === 0) return 0;
@@ -134,17 +165,25 @@ const Projet = () => {
   }
 
 
-  return (
-    <div className="projects-dashboard">
-      {/* Header */}
-      <div className="projects-header">
-        <h2 className="projects-title">Liste Des Projets</h2>
-        <button className="add-project-btn" onClick={() => setShowModal(true)}>
-          <FaPlus className="icon" /> Nouveau Projet
-        </button>
-      </div>
+return ( 
+  <div className="projects-dashboard">
+    {/* Header */}
+    <div className="projects-header">
+      <h2 className="projects-title">Liste Des Projets</h2>
+      <button className="add-project-btn" onClick={() => setShowModal(true)}>
+        <FaPlus className="icon" /> Nouveau Projet
+      </button>
+    </div>
 
-      {/* Projects Grid */}
+    {/* Separator */}
+    <hr className="projects-separator" />
+
+    {/* Projects Grid or Empty State */}
+    {projets.length === 0 ? (
+      <div className="no-projects">
+        <p>🚀 Aucun projet disponible. Cliquez sur <b>"Nouveau Projet"</b> pour commencer.</p>
+      </div>
+    ) : (
       <div className="projects-grid">
         {projets.map((projet) => (
           <div 
@@ -181,7 +220,7 @@ const Projet = () => {
                   ></div>
                 </div>
                 <span className="progress-percentage">
-                  {calculateStatusPercentage(projet.taches, "TODO")}%
+                  {calculateStatusPercentage(projet.taches, "TODO")}% 
                 </span>
               </div>
 
@@ -194,7 +233,7 @@ const Projet = () => {
                   ></div>
                 </div>
                 <span className="progress-percentage">
-                  {calculateStatusPercentage(projet.taches, "IN_PROGRESS")}%
+                  {calculateStatusPercentage(projet.taches, "IN_PROGRESS")}% 
                 </span>
               </div>
 
@@ -207,7 +246,7 @@ const Projet = () => {
                   ></div>
                 </div>
                 <span className="progress-percentage">
-                  {calculateStatusPercentage(projet.taches, "DONE")}%
+                  {calculateStatusPercentage(projet.taches, "DONE")}% 
                 </span>
               </div>
             </div>
@@ -227,78 +266,80 @@ const Projet = () => {
           </div>
         ))}
       </div>
+    )}
 
-      {/* Add Project Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="project-modal">
-            <h3>Créer un nouveau projet</h3>
+    {/* Add Project Modal */}
+    {showModal && (
+      <div className="modal-overlay">
+        <div className="project-modal">
+          <h3>Créer un nouveau projet</h3>
+          <div className="form-group">
+            <label>Nom du projet</label>
+            <input
+              type="text"
+              value={newProjet.name}
+              onChange={(e) => setNewProjet({ ...newProjet, name: e.target.value })}
+              placeholder="Nommez votre projet"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Description</label>
+            <textarea
+              value={newProjet.description}
+              onChange={(e) => setNewProjet({ ...newProjet, description: e.target.value })}
+              placeholder="Décrivez votre projet"
+              rows="3"
+            />
+          </div>
+
+          <div className="form-row">
             <div className="form-group">
-              <label>Nom du projet</label>
+              <label>Date de début</label>
               <input
-                type="text"
-                value={newProjet.name}
-                onChange={(e) => setNewProjet({ ...newProjet, name: e.target.value })}
-                placeholder="Nommez votre projet"
+                type="date"
+                value={newProjet.commencer}
+                onChange={(e) => setNewProjet({ ...newProjet, commencer: e.target.value })}
               />
             </div>
 
             <div className="form-group">
-              <label>Description</label>
-              <textarea
-                value={newProjet.description}
-                onChange={(e) => setNewProjet({ ...newProjet, description: e.target.value })}
-                placeholder="Décrivez votre projet"
-                rows="3"
+              <label>Date de fin</label>
+              <input
+                type="date"
+                value={newProjet.fin}
+                onChange={(e) => setNewProjet({ ...newProjet, fin: e.target.value })}
               />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date de début</label>
-                <input
-                  type="date"
-                  value={newProjet.commencer}
-                  onChange={(e) => setNewProjet({ ...newProjet, commencer: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Date de fin</label>
-                <input
-                  type="date"
-                  value={newProjet.fin}
-                  onChange={(e) => setNewProjet({ ...newProjet, fin: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Priorité</label>
-              <select
-                value={newProjet.priority}
-                onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
-              >
-                <option value="">Sélectionnez une priorité</option>
-                <option value="Faible">Faible</option>
-                <option value="Moyen">Moyen</option>
-                <option value="HAUT">Haute</option>
-              </select>
-            </div>
-
-            <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setShowModal(false)}>
-                Annuler
-              </button>
-              <button className="submit-btn" onClick={handleAddProject}>
-                Créer le projet
-              </button>
             </div>
           </div>
+
+          <div className="form-group">
+            <label>Priorité</label>
+            <select
+              value={newProjet.priority}
+              onChange={(e) => setNewProjet({ ...newProjet, priority: e.target.value })}
+            >
+              <option value="">Sélectionnez une priorité</option>
+              <option value="Faible">Faible</option>
+              <option value="Moyen">Moyen</option>
+              <option value="HAUT">Haute</option>
+            </select>
+          </div>
+
+          <div className="modal-actions">
+            <button className="cancel-btn" onClick={() => setShowModal(false)}>
+              Annuler
+            </button>
+            <button className="submit-btn" onClick={handleAddProject}>
+              Créer le projet
+            </button>
+          </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
+
 };
 
 export default Projet;

@@ -12,39 +12,54 @@ const Dashboard = () => {
   const [tasksByAssignee, setTasksByAssignee] = useState({});
   const [tasksDue, setTasksDue] = useState({ dueThisWeek: 0, overdue: 0 });
 
-  useEffect(() => {
-    fetch("http://192.168.1.81:8081/projets")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
-        return response.text();
-      })
-      .then((text) => {
-        if (!text) {
-          throw new Error("Réponse vide");
-        }
-        return JSON.parse(text);
-      })
-      .then((data) => {
-        if (!Array.isArray(data)) {
-          throw new Error("Format JSON invalide : attendu un tableau");
-        }
+useEffect(() => {
+  const token = localStorage.getItem("token"); // récupère le token stocké après login
 
-        const projetsAvecTaches = data.map((projet) =>
-          fetch(`http://192.168.1.81:8081/projets/${projet.id}/taches`)
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-              }
-              return response.json();
-            })
-            .then((taches) => ({ ...projet, taches }))
-            .catch((error) => {
-              console.error(`Erreur lors du chargement des tâches du projet ${projet.id}`, error);
-              return { ...projet, taches: [] };
-            })
-        );
+  fetch("http://localhost:8081/projets", {
+    headers: {
+      Authorization: `Bearer ${token}`, // <-- ajout du token JWT
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then((text) => {
+      if (!text) {
+        throw new Error("Réponse vide");
+      }
+      return JSON.parse(text);
+    })
+    .then((data) => {
+      if (!Array.isArray(data)) {
+        throw new Error("Format JSON invalide : attendu un tableau");
+      }
+
+      // Pour chaque projet, charger ses tâches
+      const projetsAvecTaches = data.map((projet) =>
+        fetch(`http://localhost:8081/projets/${projet.id}/taches`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // <-- ajout du token JWT
+          },
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            //console.log("test : ",response.status)
+            return response.json();
+          })
+          .then((taches) => ({ ...projet, taches }))
+          .catch((error) => {
+            console.error(
+              `Erreur lors du chargement des tâches du projet ${projet.id}`,
+              error
+            );
+            return { ...projet, taches: [] };
+          })
+      );
 
         return Promise.all(projetsAvecTaches);
       })
@@ -60,19 +75,27 @@ const Dashboard = () => {
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
 
-        projetsFinal.forEach((projet) => {
-          projet.taches.forEach((tache) => {
-            statusCounts[tache.status] = (statusCounts[tache.status] || 0) + 1;
-            assigneeCounts[tache.utilisateur.nom] = (assigneeCounts[tache.utilisateur.nom] || 0) + 1;
-            
-            const dueDate = new Date(tache.dueDate);
-            if (dueDate < today) {
-              overdue += 1;
-            } else if (dueDate >= today && dueDate <= nextWeek) {
-              dueThisWeek += 1;
-            }
-          });
-        });
+projetsFinal.forEach((projet) => {
+  projet.taches.forEach((tache) => {
+    statusCounts[tache.status] = (statusCounts[tache.status] || 0) + 1;
+
+    if (tache.utilisateur && tache.utilisateur.nom) {
+      assigneeCounts[tache.utilisateur.nom] =
+        (assigneeCounts[tache.utilisateur.nom] || 0) + 1;
+    } else {
+      assigneeCounts["Non assigné"] =
+        (assigneeCounts["Non assigné"] || 0) + 1;
+    }
+
+    const dueDate = new Date(tache.dueDate);
+    if (dueDate < today) {
+      overdue += 1;
+    } else if (dueDate >= today && dueDate <= nextWeek) {
+      dueThisWeek += 1;
+    }
+  });
+});
+
 
         setTasksByStatus(statusCounts);
         setTasksByAssignee(assigneeCounts);
@@ -84,7 +107,7 @@ const Dashboard = () => {
   return (
     <div className='tasks-list-container'>
     <div className="dashboard-container">
-      <h2 className="dashboard-title">Tableau de bord</h2>
+     
       <div className="charts-container">
         <div className="chart-box">
           <h3>Tâches par statut</h3>
