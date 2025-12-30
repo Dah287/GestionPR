@@ -18,6 +18,9 @@ public class Utilisateur {
     private String email;
     private String password;
     private String role;
+
+    // ✅ email réel pour envoi
+    private String emailSend;
     @JsonIgnore
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Tache> taches;
@@ -38,6 +41,9 @@ public class Utilisateur {
         return nom;
     }
 
+    public String getEmailSend() {
+        return emailSend;
+    }
     public String getEmail() {
         return email;
     }
@@ -65,6 +71,9 @@ public class Utilisateur {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    public void setEmailSend(String email) {
+        this.emailSend = email;
     }
     public void setPassword(String password) {
         this.password = password;

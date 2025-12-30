@@ -1,6 +1,7 @@
 package com.example.GesPro.Controller;
 
 import com.example.GesPro.Entite.Tache;
+import com.example.GesPro.Service.EmailService;
 import com.example.GesPro.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,15 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private EmailService emailService;
 
+
+    @GetMapping("/test-email")
+    public String testEmail() {
+        emailService.sendEmail("votre-email@domaine.com", "Test", "Ceci est un test SMTP.");
+        return "Email envoyé !";
+    }
     // Récupérer toutes les tâches
     @GetMapping
     public ResponseEntity<List<Tache>> getAllTasks() {

@@ -1,7 +1,9 @@
 package com.example.GesPro.Service;
 
 import com.example.GesPro.Entite.Tache;
+import com.example.GesPro.Entite.Utilisateur;
 import com.example.GesPro.Repository.TaskRepository;
+import com.example.GesPro.Repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,49 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
+
+
+    @Autowired
+    private EmailService emailService;
     // Ajouter une nouvelle tâche
     public Tache createTask(Tache task) {
+
+        // ✅ Si une tâche est assignée à un utilisateur
+        if (task.getUtilisateur() != null && task.getUtilisateur().getId() != null) {
+
+            Utilisateur user = utilisateurRepository.findById(task.getUtilisateur().getId())
+                    .orElse(null);
+
+            if (user != null) {
+
+                // ✅ Envoyer email
+                String subject = "Nouvelle tâche assignée";
+                String message =
+                        "Bonjour " + user.getNom() + ",\n\n" +
+                                "Une nouvelle tâche vous a été assignée.\n\n" +
+                                "📌 Titre : " + task.getTitle() + "\n" +
+                                "📊 Priority : " + task.getPriority() + "\n\n" +
+                                "Merci et bonne journée.\n";
+
+//                System.out.println("===== 📌 [DEBUG] createTask() START =====");
+//
+//                // ✅ Afficher la tâche reçue
+//                System.out.println("📄 Tâche reçue :");
+//                System.out.println(" - To   : " + user.getEmailSend());
+//                System.out.println(" - Titre   : " + task.getTitle());
+//                System.out.println(" - Statut  : " + task.getStatus());
+//                System.out.println(" - Projet  : " + (task.getProjet() != null ? task.getProjet().getId() : "null"));
+//                System.out.println(" - Utilisateur ID : " + (task.getUtilisateur() != null ? task.getUtilisateur().getId() : "null"));
+
+                emailService.sendEmail(user.getEmailSend(), subject, message);
+
+                task.setUtilisateur(user);
+            }
+        }
+
         return taskRepository.save(task);
     }
 
