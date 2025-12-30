@@ -4,7 +4,9 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import "./TaskList.css";
+import useAutoLogout from "./useAutoLogout";
 export default function TaskListFiltre() {
+    useAutoLogout();
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
@@ -24,7 +26,7 @@ export default function TaskListFiltre() {
       try {
       const token = localStorage.getItem("token"); // récupération du token
 
-      const response = await fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`, {
+      const response = await fetch(`http://192.168.1.80:8081/api/projets/responsable/${idUtilisateur}`, {
         headers: {
           "Authorization": `Bearer ${token}`, // ajout du token
         },
@@ -32,7 +34,7 @@ export default function TaskListFiltre() {
         if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
         const data = await response.json();
         setProjets(data);
-        console.log("Données reçues:", data); // Ici data est correct
+        //console.log("Données reçues:", data); // Ici data est correct
       } catch (error) {
         console.error("Erreur:", error);
       }
@@ -43,7 +45,7 @@ export default function TaskListFiltre() {
 
   // Ajoutez un useEffect séparé pour surveiller les changements de 'projets'
 useEffect(() => {
-    console.log("État projets mis à jour:", projets); // Maintenant vous verrez les données
+    //console.log("État projets mis à jour:", projets); // Maintenant vous verrez les données
   }, [projets]); // Déclenché chaque fois que 'projets' change
   // Charger les utilisateurs
   useEffect(() => {
@@ -51,7 +53,7 @@ useEffect(() => {
       try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:8081/utilisateurs", {
+      const response = await fetch("http://192.168.1.80:8081/api/utilisateurs", {
         headers: {
           "Authorization": `Bearer ${token}`, // ajout du token
         },
@@ -74,20 +76,20 @@ useEffect(() => {
       try {
       const token = localStorage.getItem("token");
 
-      console.log("Fetching tasks for project:", selectedProjet);
+      //console.log("Fetching tasks for project:", selectedProjet);
 
-      const response = await fetch(`http://localhost:8081/projets/${selectedProjet}/taches`, {
+      const response = await fetch(`http://192.168.1.80:8081/api/projets/${selectedProjet}/taches`, {
         headers: {
           "Authorization": `Bearer ${token}`, // ajout du token
         },
       });
         
         // Debug: Vérifiez la réponse complète
-        console.log("Full response:", {
-          status: response.status,
-          ok: response.ok,
-          headers: [...response.headers.entries()],
-        });
+        // console.log("Full response:", {
+        //   status: response.status,
+        //   ok: response.ok,
+        //   headers: [...response.headers.entries()],
+        // });
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -98,7 +100,7 @@ useEffect(() => {
         const responseText = await response.text();
         const json = responseText ? JSON.parse(responseText) : [];
         
-        console.log("Tasks data:", json);
+        //console.log("Tasks data:", json);
         
         // Mise à jour des états
         setTodo(json.filter((task) => task.status === "TODO"));
@@ -120,7 +122,7 @@ useEffect(() => {
   }, [selectedProjet]); // Déclenché seulement quand selectedProjet change
   const handleProjetChange = (e) => {
     setSelectedProjet(e.target.value);
-    console.log("id selectionne ",selectedProjet)
+    //console.log("id selectionne ",selectedProjet)
   };
 
 
@@ -132,7 +134,7 @@ useEffect(() => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:8081/projets/responsable/${idUtilisateur}`,
+        `http://192.168.1.80:8081/api/projets/responsable/${idUtilisateur}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -144,7 +146,7 @@ useEffect(() => {
       const data = await response.json();
       setProjets(data);
 
-      console.log("Données reçues:", data);
+      //console.log("Données reçues:", data);
 
       // 👉 Auto-sélection si un seul projet
       if (data.length === 1) {
@@ -204,11 +206,11 @@ useEffect(() => {
   }
 
   function updateTaskInDatabase(task) {
-    console.log("Updating task in DB:", task);
+    //console.log("Updating task in DB:", task);
   // Récupérer le token du localStorage
   const token = localStorage.getItem("token");
 
-  fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+  fetch(`http://192.168.1.80:8081/api/tasks/${task.id}`, {
     method: "PUT",
     headers: { 
       "Content-Type": "application/json",
@@ -217,7 +219,8 @@ useEffect(() => {
     body: JSON.stringify(task),
   })
       .then((response) => response.json())
-      .then((json) => console.log("Response from DB:", json))
+      .then((json) => 
+        console.log("Response from DB:"))
       .catch((error) => console.error("Error updating task in DB:", error));
   }
 
@@ -280,22 +283,22 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const token = localStorage.getItem("token"); // Récupère ton JWT
+    const token = localStorage.getItem("token"); // récupération du token stocké
 
-    const response = await fetch(
-      `http://localhost:8081/api/tasks/tache/${selectedTask.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Ajout du token
-        },
-        body: JSON.stringify(selectedTask),
-      }
-    );
+    const response = await fetch(`http://192.168.1.80:8081/api/tasks/tache/${selectedTask.id}`, {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // ajout du token ici
+      },
+      body: JSON.stringify(selectedTask),
+    });
+
     if (!response.ok) throw new Error("Erreur lors de la modification de la tâche");
+
     setIsModalOpenn(false);
     window.location.reload();
+
   } catch (error) {
     console.error("Erreur :", error);
   }
@@ -350,12 +353,12 @@ const handleSubmit2 = async (e) => {
       },
     };
   
-    console.log("new task :", newTask);
+    //console.log("new task :", newTask);
   
     try {
  const token = localStorage.getItem("token"); // Récupère ton JWT
 
-    const response = await fetch(`http://localhost:8081/api/tasks`, {
+    const response = await fetch(`http://192.168.1.80:8081/api/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -369,7 +372,7 @@ const handleSubmit2 = async (e) => {
       }
   
       const savedTask = await response.json();
-      console.log("Tâche enregistrée :", savedTask);
+      //console.log("Tâche enregistrée :", savedTask);
   
       // Mise à jour de l'état local en fonction du statut
       switch (savedTask.status) {
@@ -434,81 +437,15 @@ const handleSubmit2 = async (e) => {
     </div>
   </div>
 </div>
-        <button onClick={handleOpenModal} className="add-task-btn">
-          Ajouter une tâche
-        </button>
+      <label></label>
       </div>
 
          {/* Separator */}
     <hr className="projects-separator" />
         {/* Ajouter Tache */}
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h4>Crée une Tâche</h4>
-            <form onSubmit={handleSubmit}>
-              <div>
-                <label>Titre</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={task.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="input-container">
-              <label className="input-label">Due Date</label>
-              <input
-                type="date"
-                name="dueDate"
-                value={task.dueDate}
-                onChange={handleInputChange}
-                required
-                className="input-field due-date"
-              />
-            </div>
-
-            <div>
-                <label> Priority </label>
-                <select
-                  name="priority"
-                  value={task.priority}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Sélectionner une priorité</option>
-                  <option value="Low">Faible</option>
-                  <option value="Medium">Moyen</option>
-                  <option value="HIGH">HAUT</option>
-                </select>
-              </div>
-              <div>
-      <label>Assigné</label>
-      <select
-        name="utilisateur"
-        value={task.utilisateur ? task.utilisateur.id : ""}
-        onChange={handleInputChange}
-      >
-        <option value="">Sélectionner un utilisateur</option>
-        {utilisateurs.map((utilisateur) => (
-          <option key={utilisateur.id} value={utilisateur.id}>
-            {utilisateur.nom} {/* Adaptez selon les champs de votre API */}
-          </option>
-        ))}
-      </select>
-    </div>
-
-              <div className="modal-actions">
-                <button type="submit">Enregistrer</button>
-                <button type="button" onClick={handleCloseModal}>
-                  Annuler
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+     
               {/* Modifier Tache */}
+                    {/* Modifier Tache */}
               {isModalOpenn && selectedTask &&(
         <div className="modal">
           <div className="modal-content">
@@ -551,18 +488,19 @@ const handleSubmit2 = async (e) => {
               </div>
               <div>
                 <label>Assigné</label>
-                <select
-                  name="utilisateur2"
-                  value={task.utilisateur ? task.utilisateur.id : ""}
-                  onChange={handleInputChange2}
-                >
-                  <option value="">Sélectionner un utilisateur</option>
-                  {utilisateurs.map((utilisateur) => (
-                    <option key={utilisateur.id} value={utilisateur.id}>
-                      {utilisateur.nom} {/* Adaptez selon les champs de votre API */}
-                    </option>
-                  ))}
-                </select>
+<select
+  name="utilisateur2"
+  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
+  onChange={handleInputChange2}
+>
+  <option value="">Sélectionner un utilisateur</option>
+  {utilisateurs.map((utilisateur) => (
+    <option key={utilisateur.id} value={utilisateur.id}>
+      {utilisateur.nom}
+    </option>
+  ))}
+</select>
+
               </div>
 
               <div className="modal-actions">

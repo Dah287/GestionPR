@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import './ChatTemplate.css';
+import useAutoLogout from "./useAutoLogout";
 const ChatTemplatee = () => {
+    useAutoLogout();
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [stompClient, setStompClient] = useState(null);
@@ -13,12 +15,12 @@ useEffect(() => {
   const token = localStorage.getItem("token"); // Récupérer le token stocké au login
 
   const client = new Client({
-    brokerURL: "ws://localhost:8080/chat", // ⚠️ mets bien `ws://` et pas `http://`
+    brokerURL: "ws://192.168.1.80:8080/chat", // ⚠️ mets bien `ws://` et pas `http://`
     connectHeaders: {
       Authorization: `Bearer ${token}`, // <-- envoi du JWT
     },
     onConnect: () => {
-      console.log("✅ Connected to WebSocket!");
+      //console.log("✅ Connected to WebSocket!");
 
       // Entrée de l'utilisateur dans le chat
       client.send(`/app/chat/enter?username=${username}`, {}, "");
@@ -32,7 +34,7 @@ useEffect(() => {
       });
     },
     onDisconnect: () => {
-      console.log("❌ Disconnected from WebSocket.");
+      //console.log("❌ Disconnected from WebSocket.");
     },
     onStompError: (frame) => {
       console.error("STOMP error:", frame);

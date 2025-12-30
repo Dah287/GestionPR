@@ -4,7 +4,9 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import "./TaskList.css";
+import useAutoLogout from "./useAutoLogout";
 export default function TaskList() {
+    useAutoLogout();
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
@@ -18,7 +20,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("token"); // 🔑 Récupération du JWT
 
-      const response = await fetch(`http://localhost:8081/projets/${projetId}/taches`, {
+      const response = await fetch(`http://192.168.1.80:8081/api/projets/${projetId}/taches`, {
         headers: {
           Authorization: `Bearer ${token}`, // 🔑 Ajout du token
         },
@@ -29,7 +31,7 @@ useEffect(() => {
       }
 
       const json = await response.json();
-      console.log("Données reçues :", json);
+      //console.log("Données reçues :", json);
 
       setTodo(json.filter((task) => task.status === "TODO"));
       setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
@@ -52,7 +54,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("token"); // 🔑 Récupération du JWT
 
-      const response = await fetch("http://localhost:8081/utilisateurs", {
+      const response = await fetch("http://192.168.1.80:8081/api/utilisateurs", {
         headers: {
           Authorization: `Bearer ${token}`, // 🔑 Ajout du token
         },
@@ -117,12 +119,12 @@ useEffect(() => {
   }
 
 function updateTaskInDatabase(task) {
-  console.log("Updating task in DB:", task);
+  //console.log("Updating task in DB:", task);
 
   // Récupération du token (par ex. depuis localStorage)
   const token = localStorage.getItem("token");
 
-  fetch(`http://localhost:8081/api/tasks/${task.id}`, {
+  fetch(`http://192.168.1.80:8081/api/tasks/${task.id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -136,7 +138,8 @@ function updateTaskInDatabase(task) {
       }
       return response.json();
     })
-    .then((json) => console.log("Response from DB:", json))
+    .then((json) => 
+      console.log("Response from DB:"))
     .catch((error) => console.error("Error updating task in DB:", error));
 }
 
@@ -201,7 +204,7 @@ const handleSubmit2 = async (e) => {
   try {
     const token = localStorage.getItem("token"); // récupération du token stocké
 
-    const response = await fetch(`http://localhost:8081/api/tasks/tache/${selectedTask.id}`, {
+    const response = await fetch(`http://192.168.1.80:8081/api/tasks/tache/${selectedTask.id}`, {
       method: "PUT",
       headers: { 
         "Content-Type": "application/json",
@@ -270,12 +273,12 @@ const handleSubmit = async (e) => {
     },
   };
 
-  console.log("new task :", newTask);
+  //console.log("new task :", newTask);
 
   try {
     const token = localStorage.getItem("token"); // récupération du token
 
-    const response = await fetch(`http://localhost:8081/api/tasks`, {
+    const response = await fetch(`http://192.168.1.80:8081/api/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -289,7 +292,7 @@ const handleSubmit = async (e) => {
     }
 
     const savedTask = await response.json();
-    console.log("Tâche enregistrée :", savedTask);
+    //console.log("Tâche enregistrée :", savedTask);
 
     // Mise à jour de l'état local en fonction du statut
     switch (savedTask.status) {
@@ -444,18 +447,19 @@ const handleSubmit = async (e) => {
               </div>
               <div>
                 <label>Assigné</label>
-                <select
-                  name="utilisateur2"
-                  value={task.utilisateur ? task.utilisateur.id : ""}
-                  onChange={handleInputChange2}
-                >
-                  <option value="">Sélectionner un utilisateur</option>
-                  {utilisateurs.map((utilisateur) => (
-                    <option key={utilisateur.id} value={utilisateur.id}>
-                      {utilisateur.nom} {/* Adaptez selon les champs de votre API */}
-                    </option>
-                  ))}
-                </select>
+<select
+  name="utilisateur2"
+  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
+  onChange={handleInputChange2}
+>
+  <option value="">Sélectionner un utilisateur</option>
+  {utilisateurs.map((utilisateur) => (
+    <option key={utilisateur.id} value={utilisateur.id}>
+      {utilisateur.nom}
+    </option>
+  ))}
+</select>
+
               </div>
 
               <div className="modal-actions">

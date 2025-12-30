@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import './Dashboard.css'; // Importation du fichier CSS pour le style
+import useAutoLogout from './useAutoLogout';
 
 // Enregistrement des éléments de chart.js nécessaires
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
+    useAutoLogout();
   const [projets, setProjets] = useState([]);
   const [tasksByStatus, setTasksByStatus] = useState({});
   const [tasksByAssignee, setTasksByAssignee] = useState({});
@@ -15,7 +17,7 @@ const Dashboard = () => {
 useEffect(() => {
   const token = localStorage.getItem("token"); // récupère le token stocké après login
 
-  fetch("http://localhost:8081/projets", {
+  fetch("http://192.168.1.80:8081/api/projets", {
     headers: {
       Authorization: `Bearer ${token}`, // <-- ajout du token JWT
     },
@@ -39,7 +41,7 @@ useEffect(() => {
 
       // Pour chaque projet, charger ses tâches
       const projetsAvecTaches = data.map((projet) =>
-        fetch(`http://localhost:8081/projets/${projet.id}/taches`, {
+        fetch(`http://192.168.1.80:8081/api/projets/${projet.id}/taches`, {
           headers: {
             Authorization: `Bearer ${token}`, // <-- ajout du token JWT
           },
@@ -48,7 +50,7 @@ useEffect(() => {
             if (!response.ok) {
               throw new Error(`Erreur HTTP: ${response.status}`);
             }
-            //console.log("test : ",response.status)
+            ////console.log("test : ",response.status)
             return response.json();
           })
           .then((taches) => ({ ...projet, taches }))

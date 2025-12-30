@@ -3,7 +3,9 @@ import "./Projet.css";
 import { useNavigate } from "react-router-dom";
 
 import { FaTrash, FaPlus, FaChevronRight } from "react-icons/fa";
+import useAutoLogout from "./useAutoLogout";
 const Projet = () => {
+    useAutoLogout();
   const [projets, setProjets] = useState([]);
   const [selectedProjet, setSelectedProjet] = useState(
     localStorage.getItem("selectedProjet") || null
@@ -26,7 +28,7 @@ const Projet = () => {
   useEffect(() => {
   const token = localStorage.getItem("token"); // Récupère le JWT stocké après login
 
-  fetch(`http://localhost:8081/projets/responsable/${idUtilisateur}`, {
+  fetch(`http://192.168.1.80:8081/api/projets/responsable/${idUtilisateur}`, {
     headers: {
       Authorization: `Bearer ${token}`, // <-- Ajout du token
     },
@@ -44,14 +46,14 @@ const Projet = () => {
       return JSON.parse(text);
     })
     .then((data) => {
-      console.log("Données reçues :", data);
+      //console.log("Données reçues :", data);
       if (!Array.isArray(data)) {
         throw new Error("Format JSON invalide : attendu un tableau");
       }
 
       // Charger les tâches pour chaque projet
       const projetsAvecTaches = data.map((projet) =>
-        fetch(`http://localhost:8081/projets/${projet.id}/taches`, {
+        fetch(`http://192.168.1.80:8081/api/projets/${projet.id}/taches`, {
           headers: {
             Authorization: `Bearer ${token}`, // <-- Ajout du token
           },
@@ -93,7 +95,7 @@ const newProjet1 = {
 const handleAddProject = () => {
   const token = localStorage.getItem("token");
 
-  fetch("http://localhost:8081/projets", {
+  fetch("http://192.168.1.80:8081/api/projets", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -121,7 +123,7 @@ const handleDeleteProject = (projetId) => {
   const token = localStorage.getItem("token");
 
   if (window.confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) {
-    fetch(`http://localhost:8081/projets/${projetId}`, {
+    fetch(`http://192.168.1.80:8081/api/projets/${projetId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`, // <-- Ajout du token
@@ -150,7 +152,7 @@ const handleDeleteProject = (projetId) => {
     const newSelectedProjet = projetId === selectedProjet ? null : projetId;
     setSelectedProjet(newSelectedProjet);
 
-    console.log("Projet sélectionné :", projetId);
+    //console.log("Projet sélectionné :", projetId);
 
     // Stocke l'ID dans localStorage
     localStorage.setItem("selectedProjet", newSelectedProjet);
@@ -190,6 +192,7 @@ return (
             key={projet.id} 
             className={`project-card ${selectedProjet === projet.id ? "selected" : ""}`}
             onClick={() => handleProjetClick(projet.id)}
+            onDoubleClick={() => handleProjetClick(projet.id)}
           >
             <div className="project-card-header">
               <h3 className="project-name">

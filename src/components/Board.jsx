@@ -3,7 +3,10 @@ import { DragDropContext } from "react-beautiful-dnd";
 import axios from "axios";
 import Column from "./Column";
 import "./TaskList.css";
+import useAutoLogout from "./useAutoLogout";
 const TaskBoard = () => {
+
+      useAutoLogout();
     const [todo, setTodo] = useState([]);
     const [inProgress, setInProgress] = useState([]);
     const [done, setDone] = useState([]);
@@ -13,14 +16,14 @@ const TaskBoard = () => {
     try {
       const token = localStorage.getItem("token"); // ou depuis Redux/Context
       
-      const response = await axios.get(`http://localhost:8081/projets/${projetId}/taches`, {
+      const response = await axios.get(`http://192.168.1.80:8081/api/projets/${projetId}/taches`, {
         headers: {
           Authorization: `Bearer ${token}`,  // Ajout du token
         },
       });
 
       const json = response.data;
-      console.log("Données reçues :", json);
+      //console.log("Données reçues :", json);
 
       setTodo(json.filter((task) => task.status === "TODO"));
       setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
@@ -80,17 +83,43 @@ const TaskBoard = () => {
         updateTaskInDatabase(updatedTask);
     }
 
-    function updateTaskInDatabase(task) {
-        console.log("Updating task in DB:", task); // Debugger pour voir la tâche envoyée
-        fetch(`http://localhost:8081/api/tasks/${task.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(task)
-        })
-        .then((response) => response.json())
-        .then((json) => console.log("Response from DB:", json))
-        .catch((error) => console.error("Error updating task in DB:", error)); // Log d'erreur
-    }
+function updateTaskInDatabase(task) {
+  const token = localStorage.getItem("token"); // ✅ récupère le JWT
+
+  if (!token) {
+    console.error("Aucun token trouvé — connexion requise");
+    return;
+  }
+
+  //console.log("🔄 Mise à jour tâche :", task);
+
+  fetch(`http://192.168.1.80:8081/api/tasks/${task.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`, // ✅ ajoute le token
+    },
+    body: JSON.stringify(task),
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        console.error(`❌ Erreur HTTP ${response.status}`);
+        const text = await response.text();
+        console.error("Réponse brute du serveur :", text);
+        return;
+      }
+
+      // ✅ Vérifie s’il y a bien un contenu JSON
+      const text = await response.text();
+      if (text) {
+        const json = JSON.parse(text);
+        //console.log("✅ Tâche mise à jour avec succès :", json);
+      } else {
+        //console.log("✅ Tâche mise à jour, pas de contenu retourné.");
+      }
+    })
+    .catch((error) => console.error("Erreur update task DB :", error));
+}
 
     function findItemById(id, array) {
         return array.find((item) => item.id == id);
@@ -122,10 +151,12 @@ const TaskBoard = () => {
   if (!userId) {
     return null;
   }
+
+
     return (
         <div className="tasks-list-container">
         <DragDropContext onDragEnd={handleDragEnd}>
-            <h2 style={{ textAlign: "center" }}>Tableau de tâches</h2>
+            <h2 style={{ textAlign: "center" }}>📋Tableau de tâches</h2>
             <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                 <Column title={"À Faire"} tasks={todo} id={"1"} style={{ flexGrow: 1 ,}} />
                 <Column title={"En Cours"} tasks={inProgress} id={"2"} style={{ flexGrow: 1 }} />

@@ -1,191 +1,209 @@
+// src/components/Chat.js
 import React, { useState, useEffect, useRef } from 'react';
-import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
 import axios from 'axios';
 import { Avatar } from 'antd';
 import './ChatTemplate.css';
+import useAutoLogout from './useAutoLogout';
 
 const Chat = ({ userId }) => {
+      useAutoLogout();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [recipientId, setRecipientId] = useState(null);
     const [users, setUsers] = useState([]);
-    const [stompClient, setStompClient] = useState(null);
     const messageContainerRef = useRef(null);
-    
 
+    const API_BASE = 'http://192.168.1.80:8081/api/chat';
+    const USER_API = 'http://192.168.1.80:8081/api/utilisateurs';
+
+    // 🔹 Charger la liste des utilisateurs
     useEffect(() => {
-
-          const token = localStorage.getItem("token");
-
-        axios.get('http://localhost:8081/utilisateurs', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-            .then(response => setUsers(response.data))
-            .catch(error => console.error('Erreur lors de la récupération des utilisateurs', error));
+        const token = localStorage.getItem("token");
+        axios.get(USER_API, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setUsers(res.data))
+        .catch(err => console.error("Erreur chargement utilisateurs", err));
     }, []);
-useEffect(() => {
-  const socket = new SockJS('http://localhost:8081/ws');
-  const client = Stomp.over(socket);
-  const token = localStorage.getItem("token");
 
-  client.connect(
-    { Authorization: `Bearer ${token}` }, // <-- envoi du token JWT
-    () => {
-      console.log('✅ WebSocket STOMP connecté avec succès');
-      setStompClient(client);
-    },
-    (error) => {
-      console.error('❌ Erreur de connexion STOMP:', error);
-    }
-  );
-
-        // return () => {
-        //     if (client) {
-        //         client.disconnect(() => {
-        //             console.log('Déconnecté du WebSocket');
-        //         });
-        //     }
-        // };
-    }, [userId]);
-
-    // useEffect(() => {
-    //     if (stompClient && recipientId) {
-    //         const subscription = stompClient.subscribe('/topic/messages', (message) => {
-    //             const receivedMessage = JSON.parse(message.body);
-    //             if (
-    //                 (receivedMessage.sender.id === parseInt(userId) && receivedMessage.recipient.id === parseInt(recipientId)) ||
-    //                 (receivedMessage.sender.id === parseInt(recipientId) && receivedMessage.recipient.id === parseInt(userId))
-    //             ) {
-    //                 setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-    //             }
-    //         });
-
-    //         return () => subscription.unsubscribe();
-    //     }
-    // }, [stompClient, recipientId]);
-    //Sans de 2 second de refelection 
-
-    // useEffect(() => {
-    //     if (recipientId) {
-    //         axios.get('http://localhost:8081/api/chat/allMessages')
-    //             .then(response => setMessages(response.data))
-    //             .catch(error => console.error('Erreur lors de la récupération des messages', error));
-    //     } else {
-    //         setMessages([]);
-    //     }
-    // }, [recipientId]);
-
+    // 🔹 Charger l'historique quand on change de destinataire
     useEffect(() => {
-        if (recipientId) {
-
-            const fetchMessages = () => {
-                  const token = localStorage.getItem("token");
-                axios.get('http://localhost:8081/api/chat/allMessages', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-                    .then(response => setMessages(response.data))
-                    .catch(error => console.error('Erreur lors de la récupération des messages', error));
-            };
-    
-            fetchMessages(); // Charger les messages une première fois
-            const interval = setInterval(fetchMessages, 2000); // Rafraîchir toutes les 5 sec
-    
-            return () => clearInterval(interval); // Nettoyer à la destruction
-        } else {
+        if (!recipientId) {
             setMessages([]);
+            return;
         }
-    }, [recipientId]);
-    
 
+        const token = localStorage.getItem("token");
+        axios.get(`${API_BASE}/history?recipientId=${recipientId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setMessages(res.data))
+        .catch(err => console.error("Erreur chargement historique", err));
+    }, [recipientId]);
+
+    // 🔹 SSE : écouter les nouveaux messages
+const eventSourceRef = useRef(null);
+
+useEffect(() => {
+    if (!recipientId) {
+        if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
+        }
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+    const eventSourceUrl = `http://192.168.1.80:8081/api/chat/stream?recipientId=${recipientId}&token=${encodeURIComponent(token)}`;
+
+    // Fermer l'ancienne connexion si elle existe
+    if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+    }
+
+    const es = new EventSource(eventSourceUrl);
+    eventSourceRef.current = es;
+
+    es.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        setMessages(prev => [...prev, msg]);
+    };
+
+    es.onerror = (err) => {
+        console.error("SSE error:", err);
+        es.close();
+        eventSourceRef.current = null;
+    };
+
+    return () => {
+        if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
+        }
+    };
+}, [recipientId]);
+
+    // 🔹 Scroll automatique
     useEffect(() => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
     }, [messages]);
 
-    const sendMessage = () => {
-        if (stompClient && newMessage.trim() && recipientId) {
-            const chatMessage = {
-                content: newMessage,
-                senderId: userId,
-                recipientId: recipientId,
-            };
-            stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+    // 🔹 Envoyer un message
+    const sendMessage = async () => {
+        if (!newMessage.trim() || !recipientId) return;
 
-            setMessages(prevMessages => [...prevMessages, {
-                content: newMessage,
-                sender: { id: parseInt(userId) },
-                recipient: { id: parseInt(recipientId) },
-                timestamp: new Date().toISOString(),
-            }]);
+        const token = localStorage.getItem("token");
+        const message = {
+            content: newMessage,
+            recipientId: parseInt(recipientId)
+        };
 
+        try {
+            await axios.post(`${API_BASE}/send`, message, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setNewMessage('');
+        } catch (err) {
+            console.error("Erreur envoi message", err);
         }
     };
 
-    const sortedUsers = [...users].sort((a, b) => (a.id === parseInt(userId) ? -1 : b.id === parseInt(userId) ? 1 : 0));
-
+    // 🔹 Filtrer les messages de la conversation
     const filteredMessages = messages.filter(msg =>
-        (msg.sender.id === parseInt(userId) && msg.recipient.id === parseInt(recipientId)) ||
-        (msg.sender.id === parseInt(recipientId) && msg.recipient.id === parseInt(userId))
+        (msg.senderId === parseInt(userId) && msg.recipientId === parseInt(recipientId)) ||
+        (msg.senderId === parseInt(recipientId) && msg.recipientId === parseInt(userId))
+    );
+
+    // 🔹 Trier les utilisateurs (moi en haut)
+    const sortedUsers = [...users].sort((a, b) =>
+        a.id === parseInt(userId) ? -1 : b.id === parseInt(userId) ? 1 : 0
     );
 
     return (
-        <div className="task-list-containerr">
+        <div className="task-list-containerr" style={{ height: "700px", display: 'flex' }}>
+            {/* Liste des utilisateurs */}
             <div style={{ width: '30%', borderRight: '1px solid #ccc', padding: '10px' }}>
                 <h3>Utilisateurs</h3>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                     {sortedUsers.map(user => (
-<li key={user.id} onClick={() => setRecipientId(user.id)}
-    style={{
-        cursor: 'pointer',
-        padding: '10px',
-        backgroundColor: recipientId === user.id ? '#e0e0e0' : 'transparent',
-        display: 'flex',
-        alignItems: 'center',
-        borderRadius: '5px'
-    }}>
-    <Avatar
-        style={{
-            backgroundColor: '#808080', // ou utilise getAvatarColor(user.nom)
-            color: '#fff',
-            marginRight: '10px'
-        }}
-    >
-        {user.nom?.charAt(0).toUpperCase()}
-    </Avatar>
-    <span style={{ flexGrow: 1, marginLeft: '10px' }}>
-        {user.id === parseInt(userId) ? `Moi (${user.nom})` : user.nom}
-    </span>
-</li>
+                        <li
+                            key={user.id}
+                            onClick={() => setRecipientId(user.id)}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '10px',
+                                backgroundColor: recipientId === user.id ? '#e0e0e0' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                borderRadius: '5px'
+                            }}
+                        >
+                            <Avatar style={{ backgroundColor: '#808080', color: '#fff', marginRight: '10px' }}>
+                                {user.nom?.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <span>
+                                {user.id === parseInt(userId) ? `Moi (${user.nom})` : user.nom}
+                            </span>
+                        </li>
                     ))}
                 </ul>
             </div>
+
+            {/* Zone de chat */}
             <div style={{ width: '70%', padding: '10px' }}>
                 <h3>Discussion</h3>
-                <div ref={messageContainerRef} style={{ height: '600px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                    {filteredMessages.map((msg, index) => (
-                        <div key={index} style={{ textAlign: msg.sender.id === userId ? 'right' : 'left', marginBottom: '10px' }}>
-                            <div style={{
-                                display: 'inline-block', padding: '10px', borderRadius: '10px',
-                                backgroundColor: msg.sender.id === userId ? '#007bff' : '#f0f0f0',
-                                color: msg.sender.id === userId ? '#fff' : '#000'
-                            }}>
-                                {msg.content}
-                                <div style={{ fontSize: '0.7em', color: '#888' }}>{new Date(msg.timestamp).toLocaleString()}</div>
+                <div
+                    ref={messageContainerRef}
+                    style={{
+                        height: '600px',
+                        overflowY: 'auto',
+                        border: '1px solid #ccc',
+                        padding: '10px',
+                        marginBottom: '10px'
+                    }}
+                >
+                    {filteredMessages.length === 0 ? (
+                        recipientId ? <p>Aucun message.</p> : <p>Sélectionnez un utilisateur.</p>
+                    ) : (
+                        filteredMessages.map((msg, idx) => (
+                            <div
+                                key={idx}
+                                style={{
+                                    textAlign: msg.senderId === parseInt(userId) ? 'right' : 'left',
+                                    marginBottom: '10px'
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: 'inline-block',
+                                        padding: '10px',
+                                        borderRadius: '10px',
+                                        backgroundColor: msg.senderId === parseInt(userId) ? '#007bff' : '#f0f0f0',
+                                        color: msg.senderId === parseInt(userId) ? '#fff' : '#000'
+                                    }}
+                                >
+                                    {msg.content}
+                                    <div style={{ fontSize: '0.7em', color: '#888', marginTop: '4px' }}>
+                                        {new Date(msg.timestamp).toLocaleString()}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                    {filteredMessages.length === 0 && recipientId && <div>Aucun message.</div>}
+                        ))
+                    )}
                 </div>
-                <input type="text" placeholder="Écrire un message..." value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)} style={{ width: '98%', padding: '10px' }} />
-                <button onClick={sendMessage} style={{ marginTop: '10px' }}>Envoyer</button>
+                <input
+                    type="text"
+                    placeholder="Écrire un message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    style={{ width: '85%', padding: '10px' }}
+                />
+                <button onClick={sendMessage} style={{ width: '12%', padding: '10px' }}>
+                    Envoyer
+                </button>
             </div>
         </div>
     );

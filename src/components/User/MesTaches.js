@@ -4,25 +4,33 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { FaUser, FaCalendarAlt, FaFlag } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import "../TaskList.css";
+import useAutoLogout from "../useAutoLogout";
+
 export default function MesTaches() {
+    useAutoLogout();
   const [todo, setTodo] = useState([]);
   const [inProgress, setInProgress] = useState([]);
   const [done, setDone] = useState([]);
   //const { id } = useParams();
   const userId = localStorage.getItem("id_utilisateur");
-
+  const [utilisateurs, setUtilisateurs] = useState([]);
   const projetId = localStorage.getItem("selectedProjet");
   useEffect(() => {
     const fetchTaches = async () => {
       try {
-        const response = await fetch(`http://localhost:8081/api/tasks/user/${userId}`);
-        
+          const token = localStorage.getItem("token");// récupère ton token JWT
+        const response = await fetch(`http://192.168.1.80:8081/api/tasks/user/${userId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // ajoute le token dans le header
+          }
+        });
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
   
         const json = await response.json();
-        console.log("Données reçues :", json);
+        //console.log("Données reçues :", json);
   
         setTodo(json.filter((task) => task.status === "TODO"));
         setInProgress(json.filter((task) => task.status === "IN_PROGRESS"));
@@ -82,17 +90,27 @@ export default function MesTaches() {
     updateTaskInDatabase(updatedTask);
   }
 
-  function updateTaskInDatabase(task) {
-    console.log("Updating task in DB:", task);
-    fetch(`http://localhost:8081/api/tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
+function updateTaskInDatabase(task) {
+  //console.log("Updating task in DB:", task);
+  const token = localStorage.getItem("token");
+
+  fetch(`http://192.168.1.80:8081/api/tasks/${task.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`, // ✅ manquant dans ton code
+    },
+    body: JSON.stringify(task),
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Erreur lors de la mise à jour");
+      return response.json();
     })
-      .then((response) => response.json())
-      .then((json) => console.log("Response from DB:", json))
-      .catch((error) => console.error("Error updating task in DB:", error));
-  }
+    .then((json) => 
+      console.log("Réponse du serveur :"))
+    .catch((error) => console.error("Erreur update DB:", error));
+}
+
 
   function findItemById(id, array) {
     return array.find((item) => item.id == id);
@@ -123,7 +141,29 @@ const [selectedTask, setSelectedTask] = useState({
 
 });
 
+  // Charger les utilisateurs
+  useEffect(() => {
+    const fetchUtilisateurs = async () => {
+      try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://192.168.1.80:8081/api/utilisateurs", {
+        headers: {
+          "Authorization": `Bearer ${token}`, // ajout du token
+        },
+      });
+        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+        const data = await response.json();
+        setUtilisateurs(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des utilisateurs:", error);
+      }
+    };
+    fetchUtilisateurs();
+  }, []);
+
 const handleTaskDoubleClick = (task) => {
+  //console.log("Tâche sélectionnée :", task);
   setSelectedTask(task);
   setIsModalOpenn(true);
 };
@@ -153,19 +193,26 @@ if (name === 'utilisateur2') {
 const handleSubmit2 = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://localhost:8081/api/tasks/tache/${selectedTask.id}`, {
+    const token = localStorage.getItem("token"); // récupération du token stocké
+
+    const response = await fetch(`http://192.168.1.80:8081/api/tasks/tache/${selectedTask.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // ajout du token ici
+      },
       body: JSON.stringify(selectedTask),
     });
+
     if (!response.ok) throw new Error("Erreur lors de la modification de la tâche");
+
     setIsModalOpenn(false);
     window.location.reload();
+
   } catch (error) {
     console.error("Erreur :", error);
   }
 };
-
   
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -200,6 +247,8 @@ const handleSubmit2 = async (e) => {
   
   
   const handleSubmit = async (e) => {
+
+      const token = localStorage.getItem("token");
     e.preventDefault();
   
     const projetId = localStorage.getItem("selectedProjet");
@@ -215,14 +264,15 @@ const handleSubmit2 = async (e) => {
       },
     };
   
-    console.log("new task :", newTask);
+    //console.log("new task :", newTask);
   
     try {
-      const response = await fetch(`http://localhost:8081/api/tasks`, {
+      const response = await fetch(`http://192.168.1.80:8081/api/tasks`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // <-- ajout du token
+    },
         body: JSON.stringify(newTask),
       });
   
@@ -231,7 +281,7 @@ const handleSubmit2 = async (e) => {
       }
   
       const savedTask = await response.json();
-      console.log("Tâche enregistrée :", savedTask);
+      //console.log("Tâche enregistrée :", savedTask);
   
       // Mise à jour de l'état local en fonction du statut
       switch (savedTask.status) {
@@ -263,7 +313,6 @@ const handleSubmit2 = async (e) => {
   if (!userId) {
     return null;
   }
-
   return (
     <div className="task-list-container">
       {/* Conteneur du titre et du bouton sur la même ligne */}
@@ -276,70 +325,7 @@ const handleSubmit2 = async (e) => {
          {/* Separator */}
     <hr className="projects-separator" />
         {/* Ajouter Tache */}
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h4>Crée une Tâche</h4>
-            <form onSubmit={handleSubmit}>
-              <div>
-                <label>Titre</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={task.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="input-container">
-              <label className="input-label">Due Date</label>
-              <input
-                type="date"
-                name="dueDate"
-                value={task.dueDate}
-                onChange={handleInputChange}
-                required
-                className="input-field due-date"
-              />
-            </div>
 
-            <div>
-                <label> Priority </label>
-                <select
-                  name="priority"
-                  value={task.priority}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Sélectionner une priorité</option>
-                  <option value="Low">Faible</option>
-                  <option value="Medium">Moyen</option>
-                  <option value="HIGH">HAUT</option>
-                </select>
-              </div>
-              <div>
-                <label> Assigné </label>
-                <select
-                  name="utilisateur"
-                  value={task.utilisateur ? task.utilisateur.id : ""}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
-                  <option value="1">user 1</option>
-                  <option value="2">user 2</option>
-                  <option value="3">user 3</option>
-                </select>
-              </div>
-
-              <div className="modal-actions">
-                <button type="submit">Enregistrer</button>
-                <button type="button" onClick={handleCloseModal}>
-                  Annuler
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
               {/* Modifier Tache */}
               {isModalOpenn && selectedTask &&(
         <div className="modal">
@@ -382,17 +368,21 @@ const handleSubmit2 = async (e) => {
                 </select>
               </div>
               <div>
-                <label> Assigné </label>
-                <select
-                  name="utilisateur2"
-                  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
-                  onChange={handleInputChange2}
-                >
-                  <option value="">Sélectionner un utilisateur</option> {/* Option vide pour forcer la sélection */}
-                  <option value="1">user 1</option>
-                  <option value="2">user 2</option>
-                  <option value="3">user 3</option>
-                </select>
+                <label>Assigné</label>
+<select
+  name="utilisateur2"
+  value={selectedTask.utilisateur ? selectedTask.utilisateur.id : ""}
+  onChange={handleInputChange2}
+  disabled
+>
+  <option value="">Sélectionner un utilisateur</option>
+  {utilisateurs.map((utilisateur) => (
+    <option key={utilisateur.id} value={utilisateur.id}>
+      {utilisateur.nom}
+    </option>
+  ))}
+</select>
+
               </div>
 
               <div className="modal-actions">

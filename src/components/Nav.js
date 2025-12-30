@@ -1,8 +1,10 @@
 import React from "react";
 import { Home, Inbox, MessageCircle, FilePlus, FileText, LayoutDashboard, MoreHorizontal, Grid, BarChart } from "lucide-react";
 import "./Nav.css";
+import useAutoLogout from "./useAutoLogout";
 
 const Nav = () => {
+    useAutoLogout();
   const userId = localStorage.getItem("id_utilisateur");
 
   if (!userId) {

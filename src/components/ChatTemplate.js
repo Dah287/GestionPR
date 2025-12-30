@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Chat from './Chat'; // Importez votre composant Chat
+import useAutoLogout from './useAutoLogout';
 
 const ChatTemplate = () => {
+      useAutoLogout();
     const projectId = 1; // Remplacez par l'ID du projet dynamique si nécessaire
     const [userId, setUserId] = useState(null); // Initialisez userId à null
 

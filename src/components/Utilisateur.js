@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./Utilisateur.css"; // Créez ce fichier CSS
 import { FaTrash, FaPlus } from "react-icons/fa";
+import useAutoLogout from "./useAutoLogout";
 
 const Utilisateur = () => {
+    useAutoLogout();
   const [utilisateurs, setUtilisateurs] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -16,7 +18,7 @@ const Utilisateur = () => {
 useEffect(() => {
   const token = localStorage.getItem("token"); // récupère le token stocké au login
 
-  fetch("http://localhost:8081/utilisateurs", {
+  fetch("http://192.168.1.80:8081/api/utilisateurs", {
     headers: {
       Authorization: `Bearer ${token}`, // <-- ajout du token
     },
@@ -38,7 +40,7 @@ useEffect(() => {
 const handleAddUser = () => {
   const token = localStorage.getItem("token");
 
-  fetch("http://localhost:8081/utilisateurs", {
+  fetch("http://192.168.1.80:8081/api/utilisateurs/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,7 +63,7 @@ const handleDeleteUser = (userId) => {
   if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
     const token = localStorage.getItem("token");
 
-    fetch(`http://localhost:8081/utilisateurs/${userId}`, {
+    fetch(`http://192.168.1.80:8081/api/utilisateurs/${userId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`, // <-- ajout du token
@@ -82,7 +84,7 @@ const handleDeleteUser = (userId) => {
 const handleUpdateUser = () => {
   const token = localStorage.getItem("token");
 
-  fetch(`http://localhost:8081/utilisateurs/${editUser.id}`, {
+  fetch(`http://192.168.1.80:8081/api/utilisateurs/${editUser.id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -120,11 +122,16 @@ const handleUpdateUser = () => {
             key={user.id}
             className="user-card"
             style={{ position: "relative" }}
-            onDoubleClick={() => setEditUser(user)} // Double clic pour commencer la mise à jour
+          onDoubleClick={() => {
+  // Ne copie PAS le mot de passe (il est hashé en base)
+  const { id, nom, email, role } = user;
+  setEditUser({ id, nom, email, role, password: "" });
+}} // Double clic pour commencer la mise à jour
           >
             <h4 className="user-title">👤 {user.nom}</h4>
-            <p>Email: {user.email}</p>
-            <p>Role: {user.role}</p>
+            
+            <p>Role: {user.role.toUpperCase()}</p>
+
             <FaTrash
               className="user-delete-icon"
               onClick={(e) => {
@@ -158,11 +165,11 @@ const handleUpdateUser = () => {
         onChange={(e) => setNewUser({ ...newUser, nom: e.target.value })}
       />
       
-      <label htmlFor="email">Email</label>
+      <label htmlFor="email">Username</label>
       <input
         id="email"
         type="email"
-        placeholder="Email"
+        placeholder="Username"
         value={newUser.email}
         onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
       />
@@ -183,8 +190,8 @@ const handleUpdateUser = () => {
         onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
       >
         <option value="">Sélectionner un rôle</option>
-        <option value="admin">admin</option>
-        <option value="user">user</option>
+        <option value="admin">ADMIN</option>
+        <option value="user">USER</option>
       </select>
       
       <div className="modal-buttons">
@@ -209,23 +216,23 @@ const handleUpdateUser = () => {
         onChange={(e) => setEditUser({ ...editUser, nom: e.target.value })}
       />
       
-      <label htmlFor="editEmail">Email</label>
+      <label htmlFor="editEmail">Username</label>
       <input
         id="editEmail"
         type="email"
-        placeholder="Email"
+        placeholder="Username"
         value={editUser.email}
         onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
       />
       
-      <label htmlFor="editPassword">Mot de passe</label>
-      <input
-        id="editPassword"
-        type="password"
-        placeholder="Mot de passe"
-        value={editUser.password}
-        onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
-      />
+<label htmlFor="editPassword">Nouveau mot de passe </label>
+<input
+  id="editPassword"
+  type="password"
+  placeholder="Laisser vide si inchangé"
+  value={editUser?.password || ""}
+  onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+/>
       
       <label htmlFor="editRole">Rôle</label>
       <select
@@ -233,8 +240,8 @@ const handleUpdateUser = () => {
         value={editUser.role}
         onChange={(e) => setEditUser({ ...editUser, role: e.target.value })}
       >
-        <option value="admin">admin</option>
-        <option value="user">user</option>
+        <option value="admin">ADMIN</option>
+        <option value="user">USER</option>
       </select>
       
       <div className="modal-buttons">
