@@ -612,6 +612,87 @@ const userName = localStorage.getItem("nom_utilisateur") || "Utilisateur"; // Fa
             }}
           />
         </ListItemButton>
+        {/* Marchés */}
+<ListItemButton
+  onClick={() => navigate("/marches")}
+  sx={{
+    borderRadius: 2,
+    py: 1.2,
+    px: 2,
+    backgroundColor: isActive("/marches")
+      ? theme.palette.primary.main
+      : "transparent",
+    color: isActive("/marches")
+      ? theme.palette.primary.contrastText
+      : theme.palette.text.primary,
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: isActive("/marches")
+        ? theme.palette.primary.main
+        : theme.palette.action.hover,
+      transform: "translateX(4px)",
+    },
+  }}
+>
+  <ListItemIcon
+    sx={{
+      color: isActive("/marches")
+        ? theme.palette.primary.contrastText
+        : theme.palette.text.secondary,
+      minWidth: 40,
+    }}
+  >
+    <FileText />
+  </ListItemIcon>
+  <ListItemText
+    primary="Marchés(1)"
+    primaryTypographyProps={{
+      fontSize: "0.95rem",
+      fontWeight: isActive("/marches") ? 600 : 500,
+    }}
+  />
+</ListItemButton>
+
+{/* Marchés 1 */}
+<ListItemButton
+  onClick={() => navigate("/marches2")}
+  sx={{
+    borderRadius: 2,
+    py: 1.2,
+    px: 2,
+    backgroundColor: isActive("/marches2")
+      ? theme.palette.primary.main
+      : "transparent",
+    color: isActive("/marches2")
+      ? theme.palette.primary.contrastText
+      : theme.palette.text.primary,
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: isActive("/marches2")
+        ? theme.palette.primary.main
+        : theme.palette.action.hover,
+      transform: "translateX(4px)",
+    },
+  }}
+>
+  <ListItemIcon
+    sx={{
+      color: isActive("/marches2")
+        ? theme.palette.primary.contrastText
+        : theme.palette.text.secondary,
+      minWidth: 40,
+    }}
+  >
+    <FilePlus />
+  </ListItemIcon>
+  <ListItemText
+    primary="Marchés(2)"
+    primaryTypographyProps={{
+      fontSize: "0.95rem",
+      fontWeight: isActive("/marches2") ? 600 : 500,
+    }}
+  />
+</ListItemButton>
 
       </List>
     </Box>

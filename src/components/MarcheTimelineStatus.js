@@ -42,39 +42,6 @@ const formatDate = (isoDate) => {
   return format(new Date(isoDate), 'dd/MM/yyyy', { locale: fr });
 };
 
-const getPhaseEstimation = (phase, marcheMontant) => {
-  // Convertir le montant du marché en nombre fiable
-  const total = parseFloat(marcheMontant);
-  const isValidTotal = !isNaN(total) && total > 0;
-
-  // Cas 1 : pourcentage fourni → on l'utilise
-  if (phase.pourcentageMontant != null && !isNaN(phase.pourcentageMontant)) {
-    const percent = parseFloat(phase.pourcentageMontant);
-    if (!isNaN(percent) && percent >= 0) {
-      const montantPhase = isValidTotal ? (total * percent) / 100 : null;
-      return {
-        percent: percent.toFixed(1),
-        montant: montantPhase ? Math.round(montantPhase) : null,
-      };
-    }
-  }
-
-  // Cas 2 : montant de la phase fourni → on calcule le %
-  if (phase.montantEstime != null && isValidTotal) {
-    const montantPhase = parseFloat(phase.montantEstime);
-    if (!isNaN(montantPhase) && montantPhase >= 0) {
-      const percent = (montantPhase / total) * 100;
-      return {
-        percent: percent.toFixed(1),
-        montant: Math.round(montantPhase),
-      };
-    }
-  }
-
-  // Cas 3 : rien de valide
-  return null;
-};
-
 const getStatusChip = (isEnRetard, isARisque, jours) => {
   if (isEnRetard) {
     return (
@@ -200,24 +167,9 @@ const MarcheTimelineDetail = ({ marche , onMarkEtapeRealisee}) => {
                       <Typography variant="subtitle1" fontWeight="bold">
                         {phase.nom}
                       </Typography>
-<Typography variant="body2" color="text.secondary">
-  {formatDate(phase.dateDebut)} → {formatDate(phase.dateFinPrevue)}
-  {(() => {
-    const estimation = getPhaseEstimation(phase, marche.montantEstime);
-    if (estimation) {
-      const { percent, montant } = estimation;
-      const pourcentageStr = percent.endsWith('.0') ? percent.slice(0, -2) : percent; // 30.0 → 30
-      if (montant !== null) {
-        // Format avec espace comme séparateur de milliers : 9000 → "9 000"
-        const montantFormate = montant.toLocaleString('fr-FR');
-        return ` • (${phase.nom} - Est. ${pourcentageStr}% • ${montantFormate} DH)`;
-      } else {
-        return ` • (${phase.nom} - Est. ${pourcentageStr}%)`;
-      }
-    }
-    return ` • (${phase.nom})`;
-  })()}
-</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(phase.dateDebut)} → {formatDate(phase.dateFinPrevue)}
+                      </Typography>
                     </Box>
                     {getStatusChip(isEnRetard, isARisque, jours)}
                   </Box>
@@ -293,7 +245,7 @@ const MarcheTimelineDetail = ({ marche , onMarkEtapeRealisee}) => {
 };
 
 // ----- Composant principal -----
-export const MarcheTimeline = () => {
+export const MarcheTimelineStatus = () => {
   const [marches, setMarches] = useState([]);
   const [selectedMarcheId, setSelectedMarcheId] = useState(null);
   const [marche, setMarche] = useState(null);
@@ -856,16 +808,16 @@ const handleCreateEtape = async () => {
         {error ? (
           <Alert severity="error">{error}</Alert>
         ) : marche ? (
-          <MarcheTimelineDetail marche={marche} 
+        //   <MarcheTimelineDetail marche={marche} 
           
-           onMarkEtapeRealisee={handleMarkEtapeRealisee}
+        //    onMarkEtapeRealisee={handleMarkEtapeRealisee}
           
-          />
+        //   />
 
-//         <MarcheStatusView
-//   marche={marche}
-//   error={error}
-// />
+        <MarcheStatusView
+  marche={marche}
+  error={error}
+/>
 
         ) : (
           <Paper sx={{ p: 3 }}>

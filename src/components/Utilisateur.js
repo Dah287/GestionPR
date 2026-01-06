@@ -10,6 +10,7 @@ const Utilisateur = () => {
   const [newUser, setNewUser] = useState({
     nom: "",
     email: "",
+    emailSend: "", 
     password: "",
     role: "",
   });
@@ -118,40 +119,43 @@ const handleUpdateUser = () => {
     <hr className="projects-separator" />
       <div className="user-list">
         {utilisateurs.map((user) => (
-          <div
-            key={user.id}
-            className="user-card"
-            style={{ position: "relative" }}
-          onDoubleClick={() => {
-  // Ne copie PAS le mot de passe (il est hashé en base)
-  const { id, nom, email, role } = user;
-  setEditUser({ id, nom, email, role, password: "" });
-}} // Double clic pour commencer la mise à jour
-          >
-            <h4 className="user-title">👤 {user.nom}</h4>
-            
-            <p>Role: {user.role.toUpperCase()}</p>
+<div
+  key={user.id}
+  className="user-card"
+  style={{ position: "relative" }}
+  onDoubleClick={() => {
+    const { id, nom, email, emailSend, role } = user;
+    setEditUser({ id, nom, email, emailSend, role, password: "" });
+  }}
+>
+  <h4 className="user-title">👤 {user.nom}</h4>
+  
+  <p>Matricule: {user.email}</p>
+  {/* ✅ Nouvelle ligne : email d'envoi */}
+  {/* <p>Email envoi: {user.emailSend || "–"}</p> */}
+  <p><strong>📧Email:</strong> {user.emailSend || "–"}</p>
+  <p>Role: {user.role.toUpperCase()}</p>
 
-            <FaTrash
-              className="user-delete-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteUser(user.id);
-              }}
-              style={{
-                position: "absolute",
-                top: "20px",
-                right: "20px",
-                cursor: "pointer",
-                fontSize: "20px",
-                color: "red",
-              }}
-            />
-          </div>
+  <FaTrash
+    className="user-delete-icon"
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteUser(user.id);
+    }}
+    style={{
+      position: "absolute",
+      top: "20px",
+      right: "20px",
+      cursor: "pointer",
+      fontSize: "20px",
+      color: "red",
+    }}
+  />
+</div>
         ))}
       </div>
 
-      {showModal && (
+{showModal && (
   <div className="modal">
     <div className="modal-content">
       <h3>Ajouter un utilisateur</h3>
@@ -165,13 +169,23 @@ const handleUpdateUser = () => {
         onChange={(e) => setNewUser({ ...newUser, nom: e.target.value })}
       />
       
-      <label htmlFor="email">Username</label>
+      <label htmlFor="email">Username (login)</label>
       <input
         id="email"
         type="email"
-        placeholder="Username"
+        placeholder="Username (login)"
         value={newUser.email}
         onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+      />
+
+      {/* ✅ NOUVEAU CHAMP */}
+      <label htmlFor="emailSend">Email d'envoi</label>
+      <input
+        id="emailSend"
+        type="email"
+        placeholder="Email pour notifications"
+        value={newUser.emailSend || ""}
+        onChange={(e) => setNewUser({ ...newUser, emailSend: e.target.value })}
       />
       
       <label htmlFor="password">Mot de passe</label>
@@ -216,23 +230,33 @@ const handleUpdateUser = () => {
         onChange={(e) => setEditUser({ ...editUser, nom: e.target.value })}
       />
       
-      <label htmlFor="editEmail">Username</label>
+      <label htmlFor="editEmail">Username (login)</label>
       <input
         id="editEmail"
         type="email"
-        placeholder="Username"
+        placeholder="Username (login)"
         value={editUser.email}
         onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
       />
+
+      {/* ✅ NOUVEAU CHAMP */}
+      <label htmlFor="editEmailSend">Email d'envoi</label>
+      <input
+        id="editEmailSend"
+        type="email"
+        placeholder="Email pour notifications"
+        value={editUser.emailSend || ""}
+        onChange={(e) => setEditUser({ ...editUser, emailSend: e.target.value })}
+      />
       
-<label htmlFor="editPassword">Nouveau mot de passe </label>
-<input
-  id="editPassword"
-  type="password"
-  placeholder="Laisser vide si inchangé"
-  value={editUser?.password || ""}
-  onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
-/>
+      <label htmlFor="editPassword">Nouveau mot de passe</label>
+      <input
+        id="editPassword"
+        type="password"
+        placeholder="Laisser vide si inchangé"
+        value={editUser?.password || ""}
+        onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+      />
       
       <label htmlFor="editRole">Rôle</label>
       <select

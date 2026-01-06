@@ -15,6 +15,8 @@ import Utilisateur from './components/Utilisateur';
 import TaskListFiltre from './components/TaskListFiltre';
 import PrivateRoute from './components/PrivateRoute'; // ✅ import
 import { MarcheTimeline } from './components/MarcheTimeline';
+import { MarcheTimelineStatus } from './components/MarcheTimelineStatus';
+import { MarcheTimeline1 } from './components/MarcheTimeline1';
 
 function AppContent() {
   const location = useLocation();
@@ -33,10 +35,18 @@ function AppContent() {
               <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />
                 <Route path="/marches" element={<MarcheTimeline />} />
+                              {/* <Route path="/marches1" element={<MarcheTimelineStatus />} />
+                              <Route path="/marches2" element={<MarcheTimeline1 />} /> */}
 
               {/* Routes privées → protégées */}
               <Route path="/projet" element={
                 <PrivateRoute><Projet /></PrivateRoute>
+              } />
+                            <Route path="/marches" element={
+                <PrivateRoute><MarcheTimeline /></PrivateRoute>
+              } />
+                            <Route path="/marches2" element={
+                <PrivateRoute><MarcheTimeline1 /></PrivateRoute>
               } />
               <Route path="/board" element={
                 <PrivateRoute><Board /></PrivateRoute>

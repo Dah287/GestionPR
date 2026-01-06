@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Projet.css";
 import { useNavigate } from "react-router-dom";
 
-import { FaTrash, FaPlus, FaChevronRight } from "react-icons/fa";
+import { FaTrash, FaPlus, FaChevronRight , FaEdit } from "react-icons/fa";
 import useAutoLogout from "./useAutoLogout";
 const Projet = () => {
     useAutoLogout();
@@ -10,7 +10,7 @@ const Projet = () => {
   const [selectedProjet, setSelectedProjet] = useState(
     localStorage.getItem("selectedProjet") || null
   );
-
+const [editProjet, setEditProjet] = useState(null); // Projet sélectionné pour édition
   const idUtilisateur = localStorage.getItem("id_utilisateur");
   const [showModal, setShowModal] = useState(false);
   const [newProjet, setNewProjet] = useState({
@@ -24,6 +24,46 @@ const Projet = () => {
     fin: ""
 
   });
+
+
+
+  const handleEditProject = (projet) => {
+  // Formater les dates pour les inputs (au format YYYY-MM-DD)
+  const formatDateForInput = (dateStr) => dateStr ? dateStr.split('T')[0] : '';
+
+  setEditProjet({
+    ...projet,
+    commencer: formatDateForInput(projet.commencer),
+    fin: formatDateForInput(projet.fin),
+  });
+};
+
+const handleUpdateProject = () => {
+  const token = localStorage.getItem("token");
+
+  // Ne pas envoyer les tâches ni l'id dans le payload de mise à jour
+  const { id, taches, ...updateData } = editProjet;
+
+  fetch(`http://192.168.1.80:8081/api/projets/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(updateData),
+  })
+    .then((response) => response.json())
+    .then((updatedProjet) => {
+      // Mettre à jour la liste locale
+      setProjets(projets.map(p => p.id === id ? { ...updatedProjet, taches: p.taches } : p));
+      setEditProjet(null);
+    })
+    .catch((error) => {
+      console.error("Erreur lors de la mise à jour du projet :", error);
+      alert("Erreur lors de la mise à jour");
+    });
+};
+
 
   useEffect(() => {
   const token = localStorage.getItem("token"); // Récupère le JWT stocké après login
@@ -194,21 +234,37 @@ return (
             onClick={() => handleProjetClick(projet.id)}
             onDoubleClick={() => handleProjetClick(projet.id)}
           >
-            <div className="project-card-header">
-              <h3 className="project-name">
-                <span className="project-icon">📋</span>
-                {projet.name}
-              </h3>
-              <button 
-                className="delete-project-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteProject(projet.id);
-                }}
-              >
-                <FaTrash />
-              </button>
-            </div>
+<div className="project-card-header">
+  <h3 className="project-name">
+    <span className="project-icon">📋</span>
+    {projet.name}
+  </h3>
+  <div className="project-actions">
+    {/* ✅ Bouton Modifier */}
+    <button 
+      className="edit-project-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleEditProject(projet); // À implémenter
+      }}
+      title="Modifier le projet"
+    >
+      <FaEdit size={14} />
+    </button>
+    
+    {/* ❌ Bouton Supprimer */}
+    <button 
+      className="delete-project-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteProject(projet.id);
+      }}
+      title="Supprimer le projet"
+    >
+      <FaTrash size={14} />
+    </button>
+  </div>
+</div>
 
             <p className="project-description">{projet.description || "Aucune description"}</p>
 
@@ -340,6 +396,76 @@ return (
         </div>
       </div>
     )}
+{/* Modal d'édition */}
+{editProjet && (
+  <div className="modal-overlay">
+    <div className="project-modal">
+      <h3>Modifier le projet</h3>
+      <div className="form-group">
+        <label>Nom du projet</label>
+        <input
+          type="text"
+          value={editProjet.name || ""}
+          onChange={(e) => setEditProjet({ ...editProjet, name: e.target.value })}
+          placeholder="Nommez votre projet"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Description</label>
+        <textarea
+          value={editProjet.description || ""}
+          onChange={(e) => setEditProjet({ ...editProjet, description: e.target.value })}
+          placeholder="Décrivez votre projet"
+          rows="3"
+        />
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label>Date de début</label>
+          <input
+            type="date"
+            value={editProjet.commencer || ""}
+            onChange={(e) => setEditProjet({ ...editProjet, commencer: e.target.value })}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Date de fin</label>
+          <input
+            type="date"
+            value={editProjet.fin || ""}
+            onChange={(e) => setEditProjet({ ...editProjet, fin: e.target.value })}
+          />
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label>Priorité</label>
+        <select
+          value={editProjet.priority || ""}
+          onChange={(e) => setEditProjet({ ...editProjet, priority: e.target.value })}
+        >
+          <option value="">Sélectionnez une priorité</option>
+          <option value="Faible">Faible</option>
+          <option value="Moyen">Moyen</option>
+          <option value="HAUT">Haute</option>
+        </select>
+      </div>
+
+      <div className="modal-actions">
+        <button className="cancel-btn" onClick={() => setEditProjet(null)}>
+          Annuler
+        </button>
+        <button className="submit-btn" onClick={handleUpdateProject}>
+          Mettre à jour
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
   </div>
 );
 
