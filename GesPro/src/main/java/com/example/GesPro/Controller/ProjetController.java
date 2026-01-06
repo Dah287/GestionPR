@@ -64,4 +64,17 @@ public class ProjetController {
         return projetService.getProjetsByResponsableId(id); // Renvoie les projets associés à l'ID du responsable
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Projet> updateProjet(
+            @PathVariable Long id,
+            @RequestBody Projet projetDetails) {
+
+        Projet updatedProjet = projetService.updateProjet(id, projetDetails);
+        if (updatedProjet != null) {
+            return ResponseEntity.ok(updatedProjet);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

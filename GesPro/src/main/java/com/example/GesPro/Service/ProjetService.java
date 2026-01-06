@@ -50,4 +50,19 @@ public class ProjetService {
     public List<Projet> getProjetsByResponsableId(Long responsableId) {
         return projetRepository.findByResponsableId(responsableId);
     }
+
+    public Projet updateProjet(Long id, Projet projetDetails) {
+        Projet existingProjet = projetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        // Mettez à jour uniquement les champs autorisés
+        existingProjet.setName(projetDetails.getName());
+        existingProjet.setDescription(projetDetails.getDescription());
+        existingProjet.setCommencer(projetDetails.getCommencer());
+        existingProjet.setFin(projetDetails.getFin());
+        existingProjet.setPriority(projetDetails.getPriority());
+        // ⚠️ Ne mettez PAS à jour le responsable ici (sécurité)
+
+        return projetRepository.save(existingProjet);
+    }
 }

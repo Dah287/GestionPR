@@ -54,7 +54,7 @@ public class UtilisateurService {
         existingUser.setNom(updatedUser.getNom());
         existingUser.setEmail(updatedUser.getEmail());
         existingUser.setRole(updatedUser.getRole());
-
+        existingUser.setEmailSend(updatedUser.getEmailSend());
         // 🔐 Ne mettre à jour le mot de passe que s'il est fourni et non vide
         String rawPassword = updatedUser.getPassword();
         if (rawPassword != null && !rawPassword.trim().isEmpty()) {

@@ -89,6 +89,6 @@ public class Projet {
     }
 
     public void setPriority(String priority) {
-        priority = priority;
+        this.priority = priority;
     }
 }
