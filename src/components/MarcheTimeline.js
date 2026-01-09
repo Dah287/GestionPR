@@ -27,6 +27,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+import { FiDownload } from 'react-icons/fi';
 
 import { MarcheService } from '../components/service';
 import { MarcheStatusView } from './MarcheStatusView';
@@ -118,7 +119,71 @@ const MarcheTimelineDetail = ({ marche , onMarkEtapeRealisee}) => {
   const displayNumero = marche.numero.replace('-', '/');
 
 
+const handleDownloadOSD = async (phaseId) => {
+  try {
+    const response = await fetch(
+      `http://192.168.1.80:8081/api/ods/generate/${phaseId}`,
+      {
+        method: 'GET',
+        // headers: {
+        //   'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        // },
+      }
+    );
 
+    if (!response.ok) {
+      throw new Error('Erreur téléchargement ODS');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ODS_Phase_${phaseId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Impossible de télécharger l’ODS');
+    console.error(err);
+  }
+};
+
+const handleDownloadDP = async (phaseId) => {
+  try {
+    const response = await fetch(
+      `http://192.168.1.80:8081/api/decomptes/generate/${phaseId}`,
+      {
+        method: 'GET',
+        // headers: {
+        //   'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        // },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Erreur téléchargement decomptes Provisoire');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Decompte_Provisoire_${phaseId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Impossible de télécharger l’Decompte_Provisoire');
+    console.error(err);
+  }
+};
   
   return (
     <Paper
@@ -129,9 +194,23 @@ const MarcheTimelineDetail = ({ marche , onMarkEtapeRealisee}) => {
         height: 'fit-content',
       }}
     >
-      <Typography variant="h5" fontWeight="bold" color="text.primary" gutterBottom>
-        Marché <Box component="span" color="primary.main">#{displayNumero}</Box> • {marche.type}
-      </Typography>
+<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+  <Typography variant="h5" fontWeight="bold" color="text.primary">
+    Marché <Box component="span" color="primary.main">#{displayNumero}</Box> • {marche.type}
+  </Typography>
+
+  {/* <Tooltip title="Télécharger OSD">
+    <Button
+      size="small"
+      variant="outlined"
+      startIcon={<FiDownload />}
+       onClick={() => handleDownloadOSD(marche.phase.id)}
+    >
+      OSD
+    </Button>
+  </Tooltip> */}
+</Box>
+
 
       <Box position="relative" pt={1}>
         <Box
@@ -197,9 +276,47 @@ const MarcheTimelineDetail = ({ marche , onMarkEtapeRealisee}) => {
                 >
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                     <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {phase.nom}
-                      </Typography>
+<Box display="flex" justifyContent="space-between" alignItems="center">
+  <Typography variant="subtitle1" fontWeight="bold">
+    {phase.nom}
+  </Typography>
+
+  <Tooltip title="Télécharger ODS">
+    <Button
+      size="small"
+      variant="outlined"
+      startIcon={<FiDownload />}
+      onClick={() => handleDownloadOSD(phase.id)}
+          sx={{
+      minHeight: '24px',   // réduit la hauteur minimale
+      height: '24px',      // fixe la hauteur (optionnel)
+      fontSize: '0.75rem', // ajuste la taille du texte si besoin
+      padding: '0 8px',    // réduit le padding horizontal
+    }}
+    >
+      ODS
+    </Button>
+  </Tooltip>
+
+    <Tooltip title="Télécharger ">
+    <Button
+      size="small"
+      variant="outlined"
+      startIcon={<FiDownload />}
+      onClick={() => handleDownloadDP(phase.id)}
+          sx={{
+      minHeight: '24px',   // réduit la hauteur minimale
+      height: '24px',      // fixe la hauteur (optionnel)
+      fontSize: '0.75rem', // ajuste la taille du texte si besoin
+      padding: '0 8px',    // réduit le padding horizontal
+    }}
+    >
+      Decompte P
+    </Button>
+  </Tooltip>
+</Box>
+
+
 <Typography variant="body2" color="text.secondary">
   {formatDate(phase.dateDebut)} → {formatDate(phase.dateFinPrevue)}
   {(() => {
@@ -446,6 +563,41 @@ const handleMarkEtapeRealisee = async (etapeId) => {
       alert('Erreur création phase: ' + err.message);
     }
   };
+
+
+  const handleDownloadOSD = async () => {
+  try {
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/marches/${marche.numero}/osd`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Erreur téléchargement OSD');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `OSD_Marche_${marche.numero}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert('Impossible de télécharger l’OSD');
+    console.error(err);
+  }
+};
+
 
 const handleCreateEtape = async () => {
   if (!newEtapeForm.phaseId) return;
